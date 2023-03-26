@@ -8,7 +8,7 @@ from statistics import mean
 from sklearn.cluster import DBSCAN
 import os
 
-from particle_filter.particle_filter import ParticleFilter
+from filter.particle_filter import ParticleFilter
 from utils.cluster_position_estimate import ClusterPositionEstimate
 from utils.particle_set import ParticleSet
 from utils.position_estimate import PositionEstimate

@@ -1,5 +1,6 @@
 from scipy import stats
-from motion_model.motion_model import MotionModel
+
+from motion_models.motion_model import MotionModel
 from strategies.injection_strategy import InjectionStrategy
 from strategies.measurement_strategy import MeasurementStrategy
 from strategies.resampling_strategy import ResamplingStrategy

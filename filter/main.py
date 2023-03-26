@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 from scipy.stats import sem
 from statistics import mean
 
+from filter.model import Model
+from filter.particle_filter import ParticleFilter
 from injectors.AlphaVarianceInjector import AlphaVariationInjector
 from measurement_models.ahistoric_measurement_model import AhistoricMeasurementModel
-from motion_model.motion_model import MotionModel
-from particle_filter.model import Model
-from particle_filter.particle_filter import ParticleFilter
+from motion_models.motion_model import MotionModel
 from resamplers.low_variance_resampler import LowVarianceResampler
 from utils.particle import Particle
 from utils.particle_set import ParticleSet
