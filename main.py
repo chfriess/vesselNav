@@ -51,7 +51,7 @@ def setup_particle_filter(reference: list) -> ParticleFilter:
 def setup_initial_particle_set() -> ParticleSet:
     particles = ParticleSet()
     for index in range(1000):
-        state = State(position=0)
+        state = State(position=0)  # TODO: change to vessel tree position estimate
         particle = Particle(state=state, weight=0)
         particles.append(particle)
     return particles
@@ -79,21 +79,21 @@ def simulate_displacement(length: int) -> list:
     return d
 
 
-def simulate_reference(path: str) -> list:
+def simulate_reference(path: str) -> list:  # TODO: change to vessel tree position estimate
     imp = np.load(path)
     return list(imp)
 
 
-def simulate_position_groundtruth(length: int) -> list:
+def simulate_position_groundtruth(length: int) -> list:  # TODO: change to vessel tree position estimate
     gt = [x for x in range(length)]
     return gt
 
 
-def display_simulation_results(grtruth: list, pfestimates: list):
+def display_simulation_results(grtruth: list, pfestimates: list):  # TODO: change to vessel tree position estimate
     posest = []
     err = []
 
-    for clusterPositionEstimate in pfestimates:
+    for clusterPositionEstimate in pfestimates: # TODO: change to vessel tree position estimate
         posest.append(clusterPositionEstimate.first_cluster.center)
         err.append(clusterPositionEstimate.first_cluster.error)
     x = [p for p in range(len(grtruth))]
@@ -129,7 +129,7 @@ if __name__ == '__main__':
 
     ref = simulate_reference(data_vault_path)
     impedance = simulate_impedance(ref)
-    groundtruth = simulate_position_groundtruth(len(impedance))
+    groundtruth = simulate_position_groundtruth(len(impedance))  # TODO: change to vessel tree position estimate
     displacements = simulate_displacement(len(impedance))
 
     """

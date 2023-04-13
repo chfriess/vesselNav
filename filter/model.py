@@ -53,7 +53,7 @@ class Model:
         logging.info("Number of Particles: " + str(len(self.particles)))
 
     def estimate_current_position_dbscan(self) -> ClusterPositionEstimate:
-        positions = [particle.state.position for particle in self.particles]
+        positions = [particle.state.position for particle in self.particles]   # TODO: change to vessel tree position estimate
         reshaped_positions = np.reshape(positions, (-1, 1))
         clustering1 = DBSCAN(eps=3, min_samples=2).fit(reshaped_positions)
 
@@ -88,9 +88,9 @@ class Model:
         weight_sum = 0
         positions = []
         for particle in self.particles:
-            position_sum += particle.state.position * particle.weight
+            position_sum += particle.state.position * particle.weight  # TODO: change to vessel tree position estimate
             weight_sum += particle.weight
-            positions.append(particle.state.position)
+            positions.append(particle.state.position)  # TODO: change to vessel tree position estimate
         if weight_sum == 0:
             position_estimate = PositionEstimate(mean(positions), sem(positions))
         else:

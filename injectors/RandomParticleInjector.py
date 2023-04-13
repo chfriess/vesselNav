@@ -15,6 +15,6 @@ class RandomParticleInjector(InjectionStrategy):
                                                           number_to_remove=number_injected_particles)
         for index in range(number_injected_particles):
             # TODO: how to correctly inject the MatchingMatrix? or is this even necessary?
-            particles.append(Particle(State(position=random.uniform(self.map_borders[0], self.map_borders[1]))))
+            particles.append(Particle(State(position=random.uniform(self.map_borders[0], self.map_borders[1]))))  # TODO: change to vessel tree position estimate
 
         return particles
