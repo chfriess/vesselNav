@@ -4,6 +4,7 @@ import logging
 import time
 from scipy.stats import sem
 from statistics import mean
+import os
 
 from filter.model import Model
 import numpy as np
@@ -14,15 +15,14 @@ def load_values(path: str):
     return list(values)
 
 
-def save_results(position_estimate: list, path: str):
-    raise NotImplementedError("function save results not implemented yet")
-
-
-def display_results(grtruth: list, pfestimates: list):  # TODO: change to vessel tree position estimate
+def save_results( pfestimates: list,
+                  grtruth: list,
+                  path: str):
+    os.chdir(path)
     posest = []
     err = []
 
-    for clusterPositionEstimate in pfestimates:  # TODO: change to vessel tree position estimate
+    for clusterPositionEstimate in pfestimates:
         posest.append(clusterPositionEstimate.first_cluster.center)
         err.append(clusterPositionEstimate.first_cluster.error)
     x = [p for p in range(len(grtruth))]
@@ -40,11 +40,18 @@ def display_results(grtruth: list, pfestimates: list):  # TODO: change to vessel
     plt.legend()
     plt.xlabel("update steps [update frequency 10Hz]")
     plt.ylabel("cumulative displacement in mm")
-    plt.show()
+
+    plt.savefig("groundtruth vs. pf estimate.svg")
+    np.save("best cluster means", np.array(posest))
+    np.save("best cluster variances", np.array(err))
 
     acc = []
     for index in range(len(grtruth)):
         acc.append(posest[index] - grtruth[index])
+
+    np.save("pf estimate errors from groundtruth", np.array(acc))
+
+
     logging.info(
         "final difference estimate vs. groundtruth = " + str(grtruth[-1] - pfestimates[-1].first_cluster.center))
     logging.info("Mean absolute deviation of PF estimate from groundtruth in mm = " + str(mean(acc)))
@@ -58,6 +65,8 @@ if __name__ == "__main__":
     impedance_path = ""
     groundtruth_path = ""
     displacements_path = ""
+
+    destination_path = ""
 
     ref = load_values(reference_path)
     impedance = load_values(impedance_path)
@@ -89,4 +98,6 @@ if __name__ == "__main__":
         print("Best position estimate cluster: " + str(position_estimate[i]))
         print("Position estimate total mean" + str(model.estimate_current_position_mean()))
 
-    display_results(groundtruth, position_estimate)
+    save_results(pfestimates=position_estimate,
+                 grtruth=groundtruth,
+                 path=destination_path)
