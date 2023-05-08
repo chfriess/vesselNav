@@ -9,9 +9,18 @@ from sklearn.cluster import DBSCAN
 import os
 
 from filter.particle_filter import ParticleFilter
+from injectors.AlphaVarianceInjector import AlphaVariationInjector
+from measurement_models.ahistoric_measurement_model import AhistoricMeasurementModel
+from measurement_models.sliding_dtw_measurement_model import SlidingDTWMeasurementModel
+from motion_models.motion_model import MotionModel
+from resamplers.low_variance_resampler import LowVarianceResampler
+from strategies.measurement_strategy import MeasurementStrategy
 from utils.cluster_position_estimate import ClusterPositionEstimate
+from utils.particle import Particle
 from utils.particle_set import ParticleSet
 from utils.position_estimate import PositionEstimate
+from utils.sliding_particle import SlidingParticle
+from utils.state import State
 
 
 class Model:
@@ -22,14 +31,48 @@ class Model:
         level=logging.INFO,
         datefmt='%Y-%m-%d %H:%M:%S')
 
-    def __init__(self, particle_filter: ParticleFilter,
-                 particles: ParticleSet,
+    def __init__(self, particle_filter: ParticleFilter = None,
+                 particles: ParticleSet = None,
                  loglevel: int = logging.INFO,
                  log_directory: str = "C:\\Users\\Chris\\OneDrive\\Desktop\\") -> None:
         self.particle_filter = particle_filter
         self.particles = particles
         self.setup_logger(loglevel=loglevel,
                           log_directory=log_directory)
+
+    def setup_particle_filter(self,
+                            reference: list,
+                            measurement_model: str):
+
+        if measurement_model == "ahistoric":
+            measurement_strategy = AhistoricMeasurementModel(reference_signal=reference)
+        elif measurement_model == "sliding_dtw":
+            measurement_strategy = SlidingDTWMeasurementModel(reference_signal=reference)
+        else:
+            raise ValueError("Select a valid measurement strategy: ahistoric or sliding_dtw")
+        motion_model = MotionModel()
+        resampling_strategy = LowVarianceResampler()
+        injection_strategy = AlphaVariationInjector(map_borders=[0, len(reference)])
+        self.particle_filter = ParticleFilter(motion_model=motion_model,
+                                              measurement_strategy=measurement_strategy,
+                                              resampler=resampling_strategy,
+                                              injector=injection_strategy)
+
+    def setup_particles(self, number_of_particles: int, initial_position: int = 0):
+        if self.particle_filter is None:
+            raise ValueError("You must setup the particle filter before choosing the number of particles")
+        self.particles = ParticleSet()
+
+        if isinstance(self.particle_filter.measurement_strategy, AhistoricMeasurementModel):
+            for index in range(number_of_particles):
+                state = State(position=initial_position)  # TODO: change to vessel tree position estimate
+                particle = Particle(state=state, weight=0)
+                self.particles.append(particle)
+        if isinstance(self.particle_filter.measurement_strategy, SlidingDTWMeasurementModel):
+            for index in range(number_of_particles):
+                state = State(position=initial_position)  # TODO: change to vessel tree position estimate
+                particle = SlidingParticle(state=state, weight=0)
+                self.particles.append(particle)
 
     @staticmethod
     def setup_logger(loglevel: int,
@@ -53,7 +96,8 @@ class Model:
         logging.info("Number of Particles: " + str(len(self.particles)))
 
     def estimate_current_position_dbscan(self) -> ClusterPositionEstimate:
-        positions = [particle.state.position for particle in self.particles]   # TODO: change to vessel tree position estimate
+        positions = [particle.state.position for particle in
+                     self.particles]  # TODO: change to vessel tree position estimate
         reshaped_positions = np.reshape(positions, (-1, 1))
         clustering1 = DBSCAN(eps=3, min_samples=2).fit(reshaped_positions)
 

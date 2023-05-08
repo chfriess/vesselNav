@@ -132,11 +132,6 @@ if __name__ == '__main__':
     groundtruth = simulate_position_groundtruth(len(impedance))  # TODO: change to vessel tree position estimate
     displacements = simulate_displacement(len(impedance))
 
-    """
-    for i in range(int(len(displacements)/2), len(displacements)):
-        displacements[i] = displacements[i]/2
-    """
-
     for i in range(len(ref)):
         print("Reference= " + str(ref[i]) + "|  impedance= " + str(impedance[i]) + "|  displacements= " + str(
             displacements[i]) + "|  groundtruth= " + str(groundtruth[i]))
