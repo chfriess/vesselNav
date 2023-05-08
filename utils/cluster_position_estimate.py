@@ -1,28 +1,25 @@
+from collections import OrderedDict
+
 from utils.position_estimate import PositionEstimate
 
-
+# TODO
 class ClusterPositionEstimate:
 
     def __init__(self,
-                 first_cluster: PositionEstimate,
-                 second_cluster: PositionEstimate,
+                 positions: list,
+                 clusters: OrderedDict,
                  number_of_clusters: int,
                  number_of_noise: int) -> None:
-        self.first_cluster = first_cluster
-        self.second_cluster = second_cluster
+        self.positions = positions
+        self.clusters = clusters
         self.number_of_clusters = number_of_clusters
         self.number_of_noise = number_of_noise
 
-    def __str__(self):
-        return f'[first cluster: {str(self.first_cluster)} | second cluster: {str(self.second_cluster)} | ' \
-               f'number of clusters: {str(self.number_of_clusters)} |' \
-               f' number of noise points: {str(self.number_of_noise)}   ]'
+    def get_positions(self):
+        return self.positions
 
-    def get_first_cluster(self):
-        return self.first_cluster
-
-    def get_second_cluster(self):
-        return self.second_cluster
+    def get_clusters(self):
+        return self.clusters
 
     def get_number_of_cluster(self):
         return self.number_of_clusters

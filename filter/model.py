@@ -53,8 +53,10 @@ class Model:
         logging.info("Number of Particles: " + str(len(self.particles)))
 
     def estimate_current_position_dbscan(self) -> ClusterPositionEstimate:
-        positions = [particle.state.position for particle in self.particles]   # TODO: change to vessel tree position estimate
-        reshaped_positions = np.reshape(positions, (-1, 1))
+        positions = [[particle.state.position.displacement, particle.state.position.branch]
+                     for particle in self.particles]   # TODO: change to vessel tree position estimate
+        reshaped_positions = np.reshape(positions, (-1, 2))
+        print(reshaped_positions)
         clustering1 = DBSCAN(eps=3, min_samples=2).fit(reshaped_positions)
 
         labels = clustering1.labels_
@@ -70,32 +72,13 @@ class Model:
             d[index] = [y for (x, y) in list(zip(labels, positions)) if x == index]
 
         od = OrderedDict(sorted(d.items(), key=get_values_length, reverse=True))
-        first_cluster = None
-        second_cluster = None
-        if len(od) > 0:
-            first_cluster = PositionEstimate(mean(od[0]), sem(od[0]))
-        if len(od) > 1:
-            second_cluster = PositionEstimate(mean(od[1]), sem(od[1]))
 
-        position_estimate = ClusterPositionEstimate(first_cluster=first_cluster, second_cluster=second_cluster,
-                                                    number_of_clusters=no_clusters, number_of_noise=no_noise)
-        logging.info("Best Position Estimate mean/sem = " + str(position_estimate) + "\n")
-        return position_estimate
-
-    def estimate_current_position_mean(self) -> PositionEstimate:
-        # Resampling step already has taken place, therefore no weighted average is necessary
-        position_sum = 0
-        weight_sum = 0
-        positions = []
-        for particle in self.particles:
-            position_sum += particle.state.position * particle.weight  # TODO: change to vessel tree position estimate
-            weight_sum += particle.weight
-            positions.append(particle.state.position)  # TODO: change to vessel tree position estimate
-        if weight_sum == 0:
-            position_estimate = PositionEstimate(mean(positions), sem(positions))
-        else:
-            position_estimate = PositionEstimate(position_sum / weight_sum, sem(positions))
-        logging.info("Best Position Estimate mean/sem = " + str(position_estimate) + "\n")
+        #TODO: improve position estiamte
+        position_estimate = ClusterPositionEstimate(positions=[],
+                                                    clusters=od,
+                                                    number_of_clusters=no_clusters,
+                                                    number_of_noise=no_noise)
+        logging.info("Best Position Estimate mean/sem = " + str(position_estimate.get_positions()[0]) + "\n")
         return position_estimate
 
 
