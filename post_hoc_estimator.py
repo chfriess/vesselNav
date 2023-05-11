@@ -1,3 +1,5 @@
+import csv
+
 import matplotlib
 from matplotlib import pyplot as plt
 import logging
@@ -15,9 +17,9 @@ def load_values(path: str):
     return list(values)
 
 
-def save_results( pfestimates: list,
-                  grtruth: list,
-                  path: str):
+def save_results(pfestimates: list,
+                 grtruth: list,
+                 path: str):
     os.chdir(path)
     posest = []
     err = []
@@ -51,7 +53,6 @@ def save_results( pfestimates: list,
 
     np.save("pf estimate errors from groundtruth", np.array(acc))
 
-
     logging.info(
         "final difference estimate vs. groundtruth = " + str(grtruth[-1] - pfestimates[-1].first_cluster.center))
     logging.info("Mean absolute deviation of PF estimate from groundtruth in mm = " + str(mean(acc)))
@@ -66,38 +67,69 @@ if __name__ == "__main__":
     groundtruth_path = ""
     displacements_path = ""
 
-    destination_path = ""
+    destination_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\"
+    filename = "coregistration_20"
 
     ref = load_values(reference_path)
     impedance = load_values(impedance_path)
     groundtruth = load_values(groundtruth_path)
     displacements = load_values(displacements_path)
 
-    position_estimate = []
+    position_estimates = []
 
     model = Model()
     model.setup_particle_filter(reference=ref,
                                 measurement_model="ahistoric")
     model.setup_particles(number_of_particles=1000,
-                          initial_position=0)
+                          initial_position_center=0.0,
+                          inital_position_variance=0.0,
+                          alpha_center=2.0,
+                          alpha_variance=0.1
+                          )
     model.setup_logger(loglevel=logging.INFO,
-                       log_directory="C:\\Users\\Chris\\OneDrive\\Desktop\\")
+                       log_directory=destination_path,
+                       filename=filename+"_log")
 
     length = len(displacements) if len(displacements) < len(impedance) else len(impedance)
-    position_estimate.append(model.estimate_current_position_dbscan())
+    position_estimates.append(model.estimate_current_position_dbscan())
 
-    acc = 0
-    for i in range(length):
-        logging.info("Groundtruth = " + str(groundtruth[i]))
-        start = time.time()
-        model.update_model(displacement=displacements[i],
-                           impedance=impedance[i])
-        end = time.time()
-        acc += (end - start)
-        position_estimate.append(model.estimate_current_position_dbscan())
-        print("Best position estimate cluster: " + str(position_estimate[i]))
-        print("Position estimate total mean" + str(model.estimate_current_position_mean()))
+    with open(destination_path+filename+"_results.csv", 'w') as file:
+        writer = csv.writer(file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(
+            ["Update step #",
+             "Displacement",
+             "Impedance",
+             "Groundtruth",
+             "Position estimate - Groundtruth",
+             "first cluster mean",
+             "first cluster error",
+             "second cluster mean",
+             "second cluster error",
+             "number of clusters",
+             "number of noise points",
+             "duration of update step"])
+        for i in range(length):
+            logging.info("Groundtruth = " + str(groundtruth[i]))
+            start = time.time()
+            model.update_model(displacement=displacements[i],
+                               impedance=impedance[i])
+            end = time.time()
+            position_estimate = model.estimate_current_position_dbscan()
+            position_estimates.append(position_estimate)
+            print("Best position estimate cluster: " + str(position_estimates[i]))
+            writer.writerow([str(i + 1),
+                             str(displacements[i]),
+                             str(impedance[i]),
+                             str(groundtruth[i]),
+                             str(position_estimate.get_first_cluster_mean() - groundtruth[i]),
+                             str(position_estimate.get_first_cluster_mean()),
+                             str(position_estimate.get_first_cluster_error()),
+                             str(position_estimate.get_second_cluster_mean()),
+                             str(position_estimate.get_second_cluster_error()),
+                             str(position_estimate.number_of_clusters),
+                             str(position_estimate.number_of_noise),
+                             str(end - start)])
 
-    save_results(pfestimates=position_estimate,
+    save_results(pfestimates=position_estimates,
                  grtruth=groundtruth,
                  path=destination_path)

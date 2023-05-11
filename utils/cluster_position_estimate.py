@@ -21,8 +21,32 @@ class ClusterPositionEstimate:
     def get_first_cluster(self):
         return self.first_cluster
 
+    def get_first_cluster_mean(self):
+        if self.first_cluster is not None:
+            return self.first_cluster.center
+        else:
+            return "__"
+
+    def get_first_cluster_error(self):
+        if self.first_cluster is not None:
+            return self.first_cluster.error
+        else:
+            return "__"
+
     def get_second_cluster(self):
         return self.second_cluster
+
+    def get_second_cluster_mean(self):
+        if self.second_cluster is not None:
+            return self.second_cluster.center
+        else:
+            return "__"
+
+    def get_second_cluster_error(self):
+        if self.second_cluster is not None:
+            return self.second_cluster.error
+        else:
+            return "__"
 
     def get_number_of_cluster(self):
         return self.number_of_clusters

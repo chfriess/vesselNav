@@ -6,7 +6,6 @@ import logging
 from scipy.stats import sem
 from statistics import mean
 from sklearn.cluster import DBSCAN
-import os
 
 from filter.particle_filter import ParticleFilter
 from injectors.AlphaVarianceInjector import AlphaVariationInjector
@@ -24,12 +23,14 @@ from utils.state import State
 
 
 class Model:
+    """
     os.chdir("C:\\Users\\Chris\\OneDrive\\Desktop\\")
     logging.basicConfig(
         filename='particleFilterLog.log',
         format='%(asctime)s %(levelname)-8s %(message)s',
         level=logging.INFO,
         datefmt='%Y-%m-%d %H:%M:%S')
+    """
 
     def __init__(self, particle_filter: ParticleFilter = None,
                  particles: ParticleSet = None,
@@ -37,12 +38,19 @@ class Model:
                  log_directory: str = "C:\\Users\\Chris\\OneDrive\\Desktop\\") -> None:
         self.particle_filter = particle_filter
         self.particles = particles
+        self.update_steps = 1
         self.setup_logger(loglevel=loglevel,
                           log_directory=log_directory)
 
+    def reset_model(self):
+        self.update_steps = 1
+
     def setup_particle_filter(self,
-                            reference: list,
-                            measurement_model: str):
+                              reference: list,
+                              measurement_model: str,
+                              percentage_of_particles_injected: float = 0.0,
+                              alpha_variance: float = 0.0
+                              ):
 
         if measurement_model == "ahistoric":
             measurement_strategy = AhistoricMeasurementModel(reference_signal=reference)
@@ -52,39 +60,50 @@ class Model:
             raise ValueError("Select a valid measurement strategy: ahistoric or sliding_dtw")
         motion_model = MotionModel()
         resampling_strategy = LowVarianceResampler()
-        injection_strategy = AlphaVariationInjector(map_borders=[0, len(reference)])
+        injection_strategy = AlphaVariationInjector(map_borders=[0, len(reference)],
+                                                    percentage_of_particles_injected=percentage_of_particles_injected,
+                                                    alpha_variance=alpha_variance)
         self.particle_filter = ParticleFilter(motion_model=motion_model,
                                               measurement_strategy=measurement_strategy,
                                               resampler=resampling_strategy,
                                               injector=injection_strategy)
 
-    def setup_particles(self, number_of_particles: int, initial_position: int = 0):
+    def setup_particles(self,
+                        number_of_particles: int,
+                        initial_position_center: float = 0.0,
+                        inital_position_variance: float = 0.0,
+                        alpha_center: float = 2.0,
+                        alpha_variance: float = 0.1):
         if self.particle_filter is None:
             raise ValueError("You must setup the particle filter before choosing the number of particles")
         self.particles = ParticleSet()
 
         if isinstance(self.particle_filter.measurement_strategy, AhistoricMeasurementModel):
             for index in range(number_of_particles):
-                state = State(position=initial_position)  # TODO: change to vessel tree position estimate
+                state = State()
+                state.assign_random_position(center=initial_position_center, variance=inital_position_variance)
+                state.assign_random_alpha(center=alpha_center, variance=alpha_variance)
                 particle = Particle(state=state, weight=0)
                 self.particles.append(particle)
         if isinstance(self.particle_filter.measurement_strategy, SlidingDTWMeasurementModel):
             for index in range(number_of_particles):
-                state = State(position=initial_position)  # TODO: change to vessel tree position estimate
+                state = State()
+                state.assign_random_position(center=initial_position_center, variance=inital_position_variance)
                 particle = SlidingParticle(state=state, weight=0)
                 self.particles.append(particle)
 
     @staticmethod
     def setup_logger(loglevel: int,
-                     log_directory: str):
-        os.chdir(log_directory)
+                     log_directory: str,
+                     filename: str):
         logging.basicConfig(
-            filename='Model.log',
+            filename=log_directory+filename+".log",
             format='%(asctime)s %(levelname)-8s %(message)s',
             level=loglevel,
             datefmt='%Y-%m-%d %H:%M:%S')
 
     def update_model(self, displacement: float, impedance: float) -> None:
+        logging.info("Update step #: " + str(self.update_steps))
         logging.info("Displacement measurement: " + str(displacement))
         logging.info("Impedance measurement: " + str(impedance))
         self.particles = self.particle_filter.filter(
@@ -94,6 +113,7 @@ class Model:
         for particle in self.particles:
             logging.debug("UpdatedParticle: " + str(particle))
         logging.info("Number of Particles: " + str(len(self.particles)))
+        self.update_steps += 1
 
     def estimate_current_position_dbscan(self) -> ClusterPositionEstimate:
         positions = [particle.state.position for particle in

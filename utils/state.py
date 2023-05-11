@@ -2,11 +2,9 @@ from numpy import random
 
 
 class State:
-    def __init__(self, position: float,
+    def __init__(self, position: float = 0,
                  alpha: float = 0) -> None:
-        if position < -1000 or alpha < 0:
-            raise ValueError("position must be greater than -1 and alpha must be non-negative")
-        self.position = position  # TODO: change to vessel tree position estimate
+        self.position = position
         if alpha != 0:
             self.alpha = alpha
         else:
@@ -23,11 +21,14 @@ class State:
     def assign_random_alpha(self, center: float = 2, variance: float = 0.1):
         self.alpha = random.normal(loc=center, scale=variance)
 
-    def get_position(self):  # TODO: change to vessel tree position estimate
+    def assign_random_position(self, center: float = 0, variance: float = 0.1):
+        self.position = random.normal(loc=center, scale=variance)
+
+    def get_position(self):
         return self.position
 
     def get_alpha(self):
         return self.alpha
 
-    def set_position(self, position: float):  # TODO: change to vessel tree position estimate
+    def set_position(self, position: float):
         self.position = position

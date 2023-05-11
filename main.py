@@ -1,3 +1,4 @@
+import csv
 import logging
 
 import matplotlib
@@ -143,15 +144,31 @@ if __name__ == '__main__':
     position_estimate.append(model.estimate_current_position_dbscan())
 
     acc = 0
-    for i in range(length):
-        logging.info("Groundtruth = " + str(groundtruth[i]))
-        start = time.time()
-        model.update_model(displacement=displacements[i],
-                           impedance=impedance[i])
-        end = time.time()
-        acc += (end - start)
-        position_estimate.append(model.estimate_current_position_dbscan())
-        print("Best position estimate cluster: " + str(position_estimate[i]))
-        print("Position estimate total mean" + str(model.estimate_current_position_mean()))
+    with open("C:\\Users\\Chris\\OneDrive\\Desktop\\test.csv", 'w') as file:
+        writer = csv.writer(file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(["Update step #",	"Displacement",	"Impedance",	"Groundtruth", "PF - Groundtruth",	"first cluster mean",	"first cluster error",	"second cluster mean",	"second cluster error"	,"number of clusters"	,"number of noise points"])
 
-    display_simulation_results(groundtruth, position_estimate)
+        for i in range(length):
+            logging.info("Groundtruth = " + str(groundtruth[i]))
+            start = time.time()
+            model.update_model(displacement=displacements[i],
+                               impedance=impedance[i])
+            end = time.time()
+            acc += (end - start)
+            pos_est = model.estimate_current_position_dbscan()
+            position_estimate.append(pos_est)
+            print("Best position estimate cluster: " + str(position_estimate[i]))
+            print("Position estimate total mean" + str(model.estimate_current_position_mean()))
+            writer.writerow([str(i+1),
+                             str(displacements[i]),
+                             str(impedance[i]),
+                             str(groundtruth[i]),
+                             str(pos_est.get_first_cluster_mean() - groundtruth[i]),
+                             str(pos_est.get_first_cluster_mean()),
+                             str(pos_est.get_first_cluster_error()),
+                             str(pos_est.get_second_cluster_mean()),
+                             str(pos_est.get_second_cluster_error()),
+                             str(pos_est.number_of_clusters),
+                             str(pos_est.number_of_noise)])
+
+        display_simulation_results(groundtruth, position_estimate)
