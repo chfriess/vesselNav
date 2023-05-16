@@ -15,6 +15,7 @@ from motion_models.motion_model import MotionModel
 from resamplers.low_variance_resampler import LowVarianceResampler
 from strategies.measurement_strategy import MeasurementStrategy
 from utils.cluster_position_estimate import ClusterPositionEstimate
+from utils.measurement_model_type_enum import MeasurementType
 from utils.particle import Particle
 from utils.particle_set import ParticleSet
 from utils.position_estimate import PositionEstimate
@@ -36,26 +37,32 @@ class Model:
                  particles: ParticleSet = None,
                  loglevel: int = logging.INFO,
                  log_directory: str = "C:\\Users\\Chris\\OneDrive\\Desktop\\") -> None:
+
+        self.update_steps = 1
+        """
         self.particle_filter = particle_filter
         self.particles = particles
-        self.update_steps = 1
         self.setup_logger(loglevel=loglevel,
-                          log_directory=log_directory)
+                          log_directory=log_directory,
+                          filename="particle_filter")
+        """
 
     def reset_model(self):
         self.update_steps = 1
 
     def setup_particle_filter(self,
                               reference: list,
-                              measurement_model: str,
-                              percentage_of_particles_injected: float = 0.0,
-                              alpha_variance: float = 0.0
+                              measurement_model: MeasurementType,
+                              percentage_of_particles_injected: float = 0.05,
+                              alpha_variance: float = 0.1
                               ):
 
-        if measurement_model == "ahistoric":
+        if measurement_model == MeasurementType.AHISTORIC:
             measurement_strategy = AhistoricMeasurementModel(reference_signal=reference)
-        elif measurement_model == "sliding_dtw":
+            logging.info("measurement model: ahistoric")
+        elif measurement_model == MeasurementType.SLIDING_DTW:
             measurement_strategy = SlidingDTWMeasurementModel(reference_signal=reference)
+            logging.info("measurement model: sliding_dtw")
         else:
             raise ValueError("Select a valid measurement strategy: ahistoric or sliding_dtw")
         motion_model = MotionModel()
@@ -77,6 +84,9 @@ class Model:
         if self.particle_filter is None:
             raise ValueError("You must setup the particle filter before choosing the number of particles")
         self.particles = ParticleSet()
+        logging.info("Number of particles = " + str(number_of_particles))
+        logging.info("initial position =  " + str(initial_position_center) + " +/- " + str(inital_position_variance))
+        logging.info("alpha = " + str(alpha_center) + " +/- " + str(alpha_variance) + "\n\n")
 
         if isinstance(self.particle_filter.measurement_strategy, AhistoricMeasurementModel):
             for index in range(number_of_particles):
@@ -96,11 +106,18 @@ class Model:
     def setup_logger(loglevel: int,
                      log_directory: str,
                      filename: str):
-        logging.basicConfig(
-            filename=log_directory+filename+".log",
-            format='%(asctime)s %(levelname)-8s %(message)s',
-            level=loglevel,
-            datefmt='%Y-%m-%d %H:%M:%S')
+
+        logger = logging.getLogger()
+        if logger.handlers[0]:
+            logger.removeHandler(logger.handlers[0])
+
+        logger.setLevel(loglevel)
+
+        file_handler = logging.FileHandler(log_directory + filename + ".log")
+        formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(message)s")
+        file_handler.setFormatter(formatter)
+
+        logger.addHandler(file_handler)
 
     def update_model(self, displacement: float, impedance: float) -> None:
         logging.info("Update step #: " + str(self.update_steps))
