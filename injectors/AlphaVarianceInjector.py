@@ -18,4 +18,5 @@ class AlphaVariationInjector(InjectionStrategy):
         particles.sort_ascending_by_weight()
         for index in range(number_injected_particles):
             particles[index].state.alpha = random.normal(loc=particles[index].state.alpha, scale=self.alpha_variance)
+            #particles[index].state.alpha = random.uniform(1, 2)
         return particles

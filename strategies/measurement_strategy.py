@@ -19,6 +19,10 @@ class MeasurementStrategy:
         # expects NOT correct weights! so the more important the particle is, the lower the weight=error has to be!
         raise NotImplementedError
 
+    @abstractmethod
+    def get_reference(self):
+        raise NotImplementedError
+
     def z_and_sigmoid_transform_particles(self, particles: ParticleSet) -> ParticleSet:
         mu = 0
         sigma = 0

@@ -6,13 +6,19 @@ from utils.particle_set import ParticleSet
 
 class SlidingDTWMeasurementModel(MeasurementStrategy):
 
-    def __init__(self, reference_signal: list):  # TODO: change to vessel tree reference
+    def __init__(self, reference_signal: list):
 
         super().__init__()
-        self.reference_signal = reference_signal  # TODO: change to vessel tree reference
+        self.reference_signal = reference_signal
 
         self.measurement_history = []
         self.particle_reference_retriever = ParticleReferenceRetriever()
+
+    def get_reference(self):
+        return self.reference_signal
+
+    def reset_measurement_history(self):
+        self.measurement_history = []
 
     def raw_weight_particles(self, particles: ParticleSet, measurement: float) -> ParticleSet:
         self.measurement_history.append(measurement)

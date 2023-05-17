@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import random
 
 import numpy as np
 
@@ -9,13 +10,13 @@ from sklearn.cluster import DBSCAN
 
 from filter.particle_filter import ParticleFilter
 from injectors.AlphaVarianceInjector import AlphaVariationInjector
+from injectors.RandomParticleInjector import RandomParticleInjector
 from measurement_models.ahistoric_measurement_model import AhistoricMeasurementModel
 from measurement_models.sliding_dtw_measurement_model import SlidingDTWMeasurementModel
 from motion_models.motion_model import MotionModel
 from resamplers.low_variance_resampler import LowVarianceResampler
-from strategies.measurement_strategy import MeasurementStrategy
 from utils.cluster_position_estimate import ClusterPositionEstimate
-from utils.measurement_model_type_enum import MeasurementType
+from utils.particle_filter_component_enums import MeasurementType, InjectorType
 from utils.particle import Particle
 from utils.particle_set import ParticleSet
 from utils.position_estimate import PositionEstimate
@@ -34,18 +35,12 @@ class Model:
     """
 
     def __init__(self, particle_filter: ParticleFilter = None,
-                 particles: ParticleSet = None,
-                 loglevel: int = logging.INFO,
-                 log_directory: str = "C:\\Users\\Chris\\OneDrive\\Desktop\\") -> None:
+                 particles: ParticleSet = None) -> None:
 
-        self.update_steps = 1
-        """
         self.particle_filter = particle_filter
         self.particles = particles
-        self.setup_logger(loglevel=loglevel,
-                          log_directory=log_directory,
-                          filename="particle_filter")
-        """
+
+        self.update_steps = 1
 
     def reset_model(self):
         self.update_steps = 1
@@ -53,9 +48,16 @@ class Model:
     def setup_particle_filter(self,
                               reference: list,
                               measurement_model: MeasurementType,
-                              percentage_of_particles_injected: float = 0.05,
-                              alpha_variance: float = 0.1
+                              injector_type: InjectorType,
                               ):
+        if injector_type == InjectorType.ALPHA_VARIANCE:
+            injection_strategy = AlphaVariationInjector(map_borders=[0, len(reference)])
+            logging.info("injector: alpha variance")
+        elif injector_type == InjectorType.RANDOM_PARTICLE:
+            injection_strategy = RandomParticleInjector(map_borders=[0, len(reference)])
+            logging.info("injector: random particle")
+        else:
+            raise ValueError("Select a valid injection strategy: alpha variance or random particle")
 
         if measurement_model == MeasurementType.AHISTORIC:
             measurement_strategy = AhistoricMeasurementModel(reference_signal=reference)
@@ -67,9 +69,7 @@ class Model:
             raise ValueError("Select a valid measurement strategy: ahistoric or sliding_dtw")
         motion_model = MotionModel()
         resampling_strategy = LowVarianceResampler()
-        injection_strategy = AlphaVariationInjector(map_borders=[0, len(reference)],
-                                                    percentage_of_particles_injected=percentage_of_particles_injected,
-                                                    alpha_variance=alpha_variance)
+
         self.particle_filter = ParticleFilter(motion_model=motion_model,
                                               measurement_strategy=measurement_strategy,
                                               resampler=resampling_strategy,
@@ -91,6 +91,7 @@ class Model:
         if isinstance(self.particle_filter.measurement_strategy, AhistoricMeasurementModel):
             for index in range(number_of_particles):
                 state = State()
+                #state.position = random.uniform(1.5, 2)
                 state.assign_random_position(center=initial_position_center, variance=inital_position_variance)
                 state.assign_random_alpha(center=alpha_center, variance=alpha_variance)
                 particle = Particle(state=state, weight=0)
@@ -98,6 +99,7 @@ class Model:
         if isinstance(self.particle_filter.measurement_strategy, SlidingDTWMeasurementModel):
             for index in range(number_of_particles):
                 state = State()
+                #state.position = random.uniform(1.5, 2)
                 state.assign_random_position(center=initial_position_center, variance=inital_position_variance)
                 particle = SlidingParticle(state=state, weight=0)
                 self.particles.append(particle)
@@ -108,8 +110,9 @@ class Model:
                      filename: str):
 
         logger = logging.getLogger()
-        if logger.handlers[0]:
-            logger.removeHandler(logger.handlers[0])
+        if len(logger.handlers) > 0:
+            for i in range(len(logger.handlers)):
+                logger.removeHandler(logger.handlers[i])
 
         logger.setLevel(loglevel)
 

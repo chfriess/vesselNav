@@ -29,6 +29,10 @@ class ParticleFilter:
         """
         return test_result[1] < 0.1
 
+
+    def get_reference(self):
+        return self.measurement_strategy.get_reference()
+
     @staticmethod
     def normalize_impedance(displacement_measurement: float,
                             impedance_measurement: float) -> float:

@@ -28,7 +28,7 @@ class MotionModel:
         error = self.calculate_displacement_error(self.displacement_history)
 
         for particle in previous_particle_set:
-            position_estimate = particle.state.position + (displacement_measurement * particle.state.alpha)  # TODO: change to vessel tree position estimate
-            particle.state.position = random.normal(loc=position_estimate,  # TODO: change to vessel tree position estimate
+            position_estimate = particle.state.position + (displacement_measurement * particle.state.alpha)
+            particle.state.position = random.normal(loc=position_estimate,
                                                     scale=error)
         return previous_particle_set
