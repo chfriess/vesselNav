@@ -1,4 +1,5 @@
 import logging
+import random
 
 from filter.particle_filter import ParticleFilter
 from injectors.AlphaVarianceInjector import AlphaVariationInjector
@@ -23,7 +24,31 @@ class VesselSegment:
         self.particles = ParticleSet()
 
     def update(self, displacement: float, impedance: float):
-        self.pf.filter(displacement_measurement=displacement, impedance_measurement=impedance)
+        self.particles = self.pf.filter(previous_particle_set=self.particles,
+                                        displacement_measurement=displacement,
+                                        impedance_measurement=impedance)
+
+    def pop_out_of_range_particles(self):
+        underflowed_particles = []
+        overflowed_particles = []
+        for particle in self.particles:
+            if particle.state.position < 0:
+                underflowed_particles.append(particle)
+                self.particles.remove(particle=particle)
+                continue
+            if particle.state.position > len(self.pf.get_reference()):
+                overflowed_particles.append(particle)
+                self.particles.remove(particle=particle)
+        return underflowed_particles, overflowed_particles
+
+    def get_length_of_segment(self):
+        return len(self.pf.get_reference())
+
+    def add_particle(self, particle: Particle):
+        self.particles.append(particle=particle)
+
+    def get_children(self):
+        return self.children
 
 
 class VesselTree:
@@ -45,7 +70,15 @@ class VesselTree:
                 vessel.children.append(new_vessel.branch_id)
 
     def redistribute_particles_to_correct_segment(self):
-        pass
+        for vessel in self.vessels:
+            underflowed_particles, overflowed_particles = vessel.pop_out_of_range_particles()
+            for particle in underflowed_particles:
+                child = random.choice(vessel.get_children())
+                particle.state.position = particle.state.position + child.get_length_of_segment()
+                child.add_particle(particle=particle)
+            for particle in overflowed_particles:
+                particle.state.position = particle.state.position - vessel.get_length_of_segment()
+                random.choice(vessel.get_children()).add_particle(particle=particle)
 
     def update(self, displacement: float, impedance: float):
         for vessel in self.vessels:
@@ -104,7 +137,7 @@ class MultidimensionalModel:
                         number_of_particles: int = 1000,
                         initial_segment: int = 0,
                         initial_position_center: float = 0.0,
-                        inital_position_variance: float = 0.0,
+                        initial_position_variance: float = 0.0,
                         alpha_center: float = 2.0,
                         alpha_variance: float = 0.1):
 
@@ -112,20 +145,20 @@ class MultidimensionalModel:
             raise ValueError("You must initialize the vessel tree before initializing the particles")
         particles = ParticleSet()
         logging.info("Number of particles = " + str(number_of_particles))
-        logging.info("initial position =  " + str(initial_position_center) + " +/- " + str(inital_position_variance))
+        logging.info("initial position =  " + str(initial_position_center) + " +/- " + str(initial_position_variance))
         logging.info("alpha = " + str(alpha_center) + " +/- " + str(alpha_variance) + "\n\n")
 
         if isinstance(self.measurement_strategy, AhistoricMeasurementModel):
             for index in range(number_of_particles):
                 state = State()
-                state.assign_random_position(center=initial_position_center, variance=inital_position_variance)
+                state.assign_random_position(center=initial_position_center, variance=initial_position_variance)
                 state.assign_random_alpha(center=alpha_center, variance=alpha_variance)
                 particle = Particle(state=state, weight=0)
                 particles.append(particle)
         if isinstance(self.measurement_strategy, SlidingDTWMeasurementModel):
             for index in range(number_of_particles):
                 state = State()
-                state.assign_random_position(center=initial_position_center, variance=inital_position_variance)
+                state.assign_random_position(center=initial_position_center, variance=initial_position_variance)
                 particle = SlidingParticle(state=state, weight=0)
                 particles.append(particle)
         self.vessel_tree.initialize_particles(particles=particles, initial_segment=initial_segment)
