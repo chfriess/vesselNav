@@ -1,5 +1,11 @@
 import logging
 import random
+from collections import OrderedDict
+from statistics import mean
+
+import numpy as np
+from scipy.stats import sem
+from sklearn.cluster import DBSCAN
 
 from filter.particle_filter import ParticleFilter
 from injectors.AlphaVarianceInjector import AlphaVariationInjector
@@ -8,9 +14,12 @@ from measurement_models.ahistoric_measurement_model import AhistoricMeasurementM
 from measurement_models.sliding_dtw_measurement_model import SlidingDTWMeasurementModel
 from motion_models.motion_model import MotionModel
 from resamplers.low_variance_resampler import LowVarianceResampler
+from utils.cluster_position_estimate import ClusterPositionEstimate
+from utils.multidimensional_cluster_position_estimate import MultidimensionalClusterPositionEstimate
 from utils.particle import Particle
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
 from utils.particle_set import ParticleSet
+from utils.position_estimate import PositionEstimate
 from utils.sliding_particle import SlidingParticle
 from utils.state import State
 
@@ -27,6 +36,12 @@ class VesselSegment:
         self.particles = self.pf.filter(previous_particle_set=self.particles,
                                         displacement_measurement=displacement,
                                         impedance_measurement=impedance)
+
+    def get_number_of_particles(self):
+        return len(self.particles)
+
+    def get_positions_of_particles(self) -> list:
+        return [particle.state.position for particle in self.particles]
 
     def pop_out_of_range_particles(self):
         underflowed_particles = []
@@ -68,6 +83,13 @@ class VesselTree:
         for vessel in self.vessels:
             if vessel.branch_id == new_vessel.parent:
                 vessel.children.append(new_vessel.branch_id)
+
+    def get_index_of_vessel_with_most_particles(self) -> int:
+        biggest_vessel_index = 0
+        for i in range(len(self.vessels)):
+            if self.vessels[i].get_number_of_particles() > self.vessels[biggest_vessel_index].get_number_of_particles():
+                biggest_vessel_index = i
+        return biggest_vessel_index
 
     def redistribute_particles_to_correct_segment(self):
         for vessel in self.vessels:
@@ -175,5 +197,49 @@ class MultidimensionalModel:
 
         self.update_steps += 1
 
-    def estimate_current_position_dbscan(self):
-        pass
+    def estimate_current_position_dbscan_in_single_branch(self, positions) -> ClusterPositionEstimate:
+        """
+        positions = [particle.state.position for particle in
+                     self.particles]
+        """
+        reshaped_positions = np.reshape(positions, (-1, 1))
+        clustering1 = DBSCAN(eps=3, min_samples=2).fit(reshaped_positions)
+
+        labels = clustering1.labels_
+        cluster_indices = list(np.unique(labels))
+
+        no_clusters = len(np.unique(labels))
+        no_noise = int(np.sum(np.array(labels) == -1, axis=0))
+
+        if -1 in cluster_indices:
+            cluster_indices.remove(-1)
+        d = {}
+        for index in cluster_indices:
+            d[index] = [y for (x, y) in list(zip(labels, positions)) if x == index]
+
+        od = OrderedDict(sorted(d.items(), key=get_values_length, reverse=True))
+        first_cluster = None
+        second_cluster = None
+        if len(od) > 0:
+            first_cluster = PositionEstimate(mean(od[0]), sem(od[0]))
+        if len(od) > 1:
+            second_cluster = PositionEstimate(mean(od[1]), sem(od[1]))
+
+        position_estimate = ClusterPositionEstimate(first_cluster=first_cluster, second_cluster=second_cluster,
+                                                    number_of_clusters=no_clusters, number_of_noise=no_noise)
+
+        return position_estimate
+
+    def estimate_current_position_dbscan(self) -> MultidimensionalClusterPositionEstimate:
+        index_of_vessel_with_most_particles = self.vessel_tree.get_index_of_vessel_with_most_particles()
+        position_estimate = self.estimate_current_position_dbscan_in_single_branch(
+            self.vessel_tree.vessels[index_of_vessel_with_most_particles].get_positions_of_particles())
+        multidim_position_estimate = MultidimensionalClusterPositionEstimate(index_of_vessel_with_most_particles,
+                                                                             position_estimate)
+        logging.info("Best Position Estimate mean/sem = " + str(multidim_position_estimate) + "\n")
+        return multidim_position_estimate
+
+
+def get_values_length(d):
+    key, values = d
+    return len(values)

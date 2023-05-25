@@ -172,9 +172,9 @@ class Model:
         weight_sum = 0
         positions = []
         for particle in self.particles:
-            position_sum += particle.state.position * particle.weight  # TODO: change to vessel tree position estimate
+            position_sum += particle.state.position * particle.weight
             weight_sum += particle.weight
-            positions.append(particle.state.position)  # TODO: change to vessel tree position estimate
+            positions.append(particle.state.position)
         if weight_sum == 0:
             position_estimate = PositionEstimate(mean(positions), sem(positions))
         else:
