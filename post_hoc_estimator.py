@@ -19,6 +19,12 @@ class PostHocEstimator:
         return list(values)
 
     @staticmethod
+    def normalize_values(data: list) -> list:
+        normalizer = sum(data)/len(data)
+        for i in range(len(data)):
+            data[i] = data[i] / normalizer
+
+    @staticmethod
     def save_figures_with_metadata(pfestimates: list,
                                    grtruth: list,
                                    cumulative_displacement: list,
@@ -81,6 +87,7 @@ class PostHocEstimator:
         logging.info("Sem of Mean absolute deviation of PF estimate from groundtruth in mm = " + str(sem(acc)))
         logging.info("Mean particle dispersion at each time step as sem of dominant cluster = " + str(sem(err)))
         plt.clf()
+
 
     @staticmethod
     def calculate_and_save_trajectory_as_csv(self,
@@ -155,10 +162,10 @@ class PostHocEstimator:
                                               injector_type: InjectorType = InjectorType.ALPHA_VARIANCE
                                               ):
         print("LOADING REFERENCE FROM: " + reference_path)
-        ref = self.load_values(reference_path)
+        ref = self.normalize_values(self.load_values(reference_path))
 
         print("LOADING IMPEDANCE FROM: " + impedance_path)
-        impedance = self.load_values(impedance_path)
+        impedance = self.normalize_values(self.load_values(impedance_path))
 
         print("LOADING GROUNDTRUTH FROM: " + groundtruth_path)
         groundtruth = self.load_values(groundtruth_path)
