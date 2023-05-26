@@ -51,7 +51,7 @@ class PostHocEstimator:
 
         matplotlib.rc('font', **font)
 
-        #plt.plot(d, cumulative_displacement, color="orange", label="cumulative displacement")
+        # plt.plot(d, cumulative_displacement, color="orange", label="cumulative displacement")
         plt.plot(x, grtruth, color="black", label="groundtruth")
         plt.plot(y, posest, color="blue", label="first cluster")
         plt.errorbar(y, posest, yerr=err, ls="None", color="blue", capsize=2, elinewidth=0.5, capthick=0.5)
@@ -150,6 +150,7 @@ class PostHocEstimator:
                                               initial_position_variance: float = 0.5,
                                               alpha_center: float = 1.5,
                                               alpha_variance: float = 0.1,
+                                              offset_groundtruth_bioelectric=0.0,
                                               measurement_type: MeasurementType = MeasurementType.AHISTORIC,
                                               injector_type: InjectorType = InjectorType.ALPHA_VARIANCE
                                               ):
@@ -174,7 +175,7 @@ class PostHocEstimator:
                                     measurement_model=measurement_type,
                                     injector_type=injector_type)
         model.setup_particles(number_of_particles=number_of_particles,
-                              initial_position_center=groundtruth[0],
+                              initial_position_center=groundtruth[0] + offset_groundtruth_bioelectric,
                               inital_position_variance=initial_position_variance,
                               alpha_center=alpha_center,
                               alpha_variance=alpha_variance
@@ -218,6 +219,7 @@ if __name__ == "__main__":
                                                         initial_position_variance=0.5,
                                                         alpha_center=1.4,
                                                         alpha_variance=0.1,
+                                                        offset_groundtruth_bioelectric=3,
                                                         measurement_type=MeasurementType.AHISTORIC,
                                                         injector_type=InjectorType.ALPHA_VARIANCE)
         print("[FINISHED CALCULATING POST HOC PATH FOR SAMPLE " + sample_nr + "] \n\n")
