@@ -1,4 +1,6 @@
 import csv
+import statistics
+
 import matplotlib
 from matplotlib import pyplot as plt
 import logging
@@ -20,9 +22,11 @@ class PostHocEstimator:
 
     @staticmethod
     def normalize_values(data: list) -> list:
-        normalizer = sum(data)/len(data)
-        for i in range(len(data)):
-            data[i] = data[i] / normalizer
+        mu = statistics.mean(data)
+        sigma = statistics.stdev(data)
+        for i, el in enumerate(data):
+            data[i] = (el-mu)/sigma
+        return data
 
     @staticmethod
     def save_figures_with_metadata(pfestimates: list,
