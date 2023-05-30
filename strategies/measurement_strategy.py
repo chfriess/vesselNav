@@ -44,7 +44,7 @@ class MeasurementStrategy:
         weight_list = []
         for particle in particles:
             weight_list.append(particle.weight)
-        return statistics.mean(weight_list), statistics.variance(weight_list)
+        return statistics.mean(weight_list), statistics.stdev(weight_list)
 
     @staticmethod
     def sigmoid_transform(x: float) -> float:

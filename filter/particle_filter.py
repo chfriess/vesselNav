@@ -1,3 +1,5 @@
+import statistics
+
 from scipy import stats
 
 from motion_models.motion_model import MotionModel
@@ -18,6 +20,7 @@ class ParticleFilter:
         self.resampler = resampler
         self.injector = injector
         self.displacement_history = []
+        self.impedance_history = []
 
     def catheter_is_moving(self) -> bool:
         if len(self.displacement_history) < 5:
@@ -28,6 +31,15 @@ class ParticleFilter:
         then, the catheter is moving 
         """
         return test_result[1] < 0.1
+
+    def contains_impedance_information(self):
+        imp_err = 125
+        if len(self.impedance_history) < 5:
+            return True
+        elif statistics.stdev(self.impedance_history[-5:]) > imp_err:
+            return True
+        else:
+            return False
 
 
     def get_reference(self):
@@ -45,6 +57,7 @@ class ParticleFilter:
                displacement_measurement: float,
                impedance_measurement: float) -> ParticleSet:
         self.displacement_history.append(displacement_measurement)
+        self.impedance_history.append(impedance_measurement)
         if not self.catheter_is_moving():
             return previous_particle_set
 

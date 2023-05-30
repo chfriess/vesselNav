@@ -1,4 +1,5 @@
 import csv
+import math
 import statistics
 
 import matplotlib
@@ -27,6 +28,35 @@ class PostHocEstimator:
         for i, el in enumerate(data):
             data[i] = (el-mu)/sigma
         return data
+
+    @staticmethod
+    def rms(signal: list, groundtruth: list) -> float:
+        if len(signal) != len(groundtruth):
+            raise ValueError("signal and groundtruth must be of same length for rms calculation")
+        acc = 0
+        for i in range(len(groundtruth)):
+            acc += math.pow((signal[i]-groundtruth[i]), 2)
+        return math.sqrt(acc / len(groundtruth))
+
+    @staticmethod
+    def rms_of_deviations(deviations: list) -> float:
+        acc = 0
+        for i in range(len(deviations)):
+            acc += math.pow((deviations[i]), 2)
+        return math.sqrt(acc/len(deviations))
+
+    @staticmethod
+    def generate_reference():
+        reference = []
+        for i in range(45):
+            reference.append((1 / 1.8) * 100)
+
+        for i in range(155):
+            reference.append((1 / 2) * 100)
+
+        for i in range(80):
+            reference.append((1 / 1.3) * 100)
+        return reference
 
     @staticmethod
     def save_figures_with_metadata(pfestimates: list,
@@ -107,6 +137,7 @@ class PostHocEstimator:
         position_estimates.append(model.estimate_current_position_dbscan())
         cumulative_displacements.append(groundtruth[0])
         print("START POST HOC ESTIMATION \n")
+        devations_from_groundtruth = []
         with open(destination_path + filename + "_results.csv", 'w') as f:
             writer = csv.writer(f, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(
@@ -124,7 +155,7 @@ class PostHocEstimator:
                  "duration of update step"])
             for i in range(length):
                 cumulative_displacements.append(cumulative_displacements[i] + displacements[i])
-                logging.info("Groundtruth = " + str(groundtruth[i]))
+                logging.info("Groundtruth = " + str(groundtruth[i+1]))
                 start = time.time()
                 model.update_model(displacement=displacements[i],
                                    impedance=impedance[i])
@@ -132,11 +163,12 @@ class PostHocEstimator:
                 position_estimate = model.estimate_current_position_dbscan()
                 position_estimates.append(position_estimate)
                 print("Best position estimate cluster: " + str(position_estimates[i]))
+                devations_from_groundtruth.append(position_estimate.get_first_cluster_mean() - groundtruth[i+1])
                 writer.writerow([str(i + 1),
                                  str(displacements[i]),
                                  str(impedance[i]),
-                                 str(groundtruth[i]),
-                                 str(position_estimate.get_first_cluster_mean() - groundtruth[i]),
+                                 str(groundtruth[i+1]),
+                                 str(position_estimate.get_first_cluster_mean() - groundtruth[i+1]),
                                  str(position_estimate.get_first_cluster_mean()),
                                  str(position_estimate.get_first_cluster_error()),
                                  str(position_estimate.get_second_cluster_mean()),
@@ -149,6 +181,19 @@ class PostHocEstimator:
                                         grtruth=groundtruth,
                                         cumulative_displacement=cumulative_displacements,
                                         path=destination_path)
+        with open(destination_path + filename + "_rms.txt", 'w') as f:
+            f.write("The rms value of the deviation of the best position estimate from the groundtruth is: \n")
+            f.write(str(self.rms_of_deviations(deviations=devations_from_groundtruth)))
+            f.write("\n\n")
+            f.write("The rms value of the deviation of the displacement from the groundtruth is: \n")
+            f.write(str(self.rms(signal=cumulative_displacements[1:], groundtruth=groundtruth[1:])))
+            cumulative_displacements_transformed = [groundtruth[0]]
+            for i in range(len(displacements)):
+                cumulative_displacements_transformed.append(displacements[i]*1.4 + cumulative_displacements_transformed[i])
+            f.write("\n\n")
+            f.write("The rms value of the deviation of the displacement multiplied with alpha from the groundtruth is: \n")
+            f.write(str(self.rms(signal=cumulative_displacements_transformed[1:], groundtruth=groundtruth[1:])))
+
 
     def estimate_post_hoc_catheter_trajectory(self,
                                               reference_path: str,
@@ -166,7 +211,8 @@ class PostHocEstimator:
                                               injector_type: InjectorType = InjectorType.ALPHA_VARIANCE
                                               ):
         print("LOADING REFERENCE FROM: " + reference_path)
-        ref = self.normalize_values(self.load_values(reference_path))
+        #ref = self.normalize_values(self.load_values(reference_path))
+        ref = self.normalize_values(self.generate_reference())
 
         print("LOADING IMPEDANCE FROM: " + impedance_path)
         impedance = self.normalize_values(self.load_values(impedance_path))
@@ -204,7 +250,7 @@ if __name__ == "__main__":
 
     estimator = PostHocEstimator()
 
-    samples = ["31"]
+    samples = ["27"]
     for sample_nr in samples:
         print("[STARTING TO CALCULATE POST HOC PATH FOR SAMPLE " + sample_nr + "] \n\n")
 
@@ -212,9 +258,9 @@ if __name__ == "__main__":
                     sample_nr + "\\data_sample_" + sample_nr + "\\"
 
         ref_path = base_path + "reference.npy"
-        imp_path = base_path + "impedance_cropped.npy"
-        grtruth_path = base_path + "groundtruth_cropped.npy"
-        displace_path = base_path + "displacements_cropped.npy"
+        imp_path = base_path + "impedance_sample"+sample_nr+".npy"
+        grtruth_path = base_path + "groundtruth_"+sample_nr+"_cropped.npy"
+        displace_path = base_path + "displacements_sample"+sample_nr+".npy"
 
         dest_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + \
                     sample_nr + "\\results_sample_" + sample_nr + "\\"
