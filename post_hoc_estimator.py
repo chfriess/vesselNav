@@ -16,6 +16,9 @@ from utils.particle_filter_component_enums import MeasurementType, InjectorType
 
 class PostHocEstimator:
 
+    def __init__(self):
+        self.alpha_center = 1
+
     @staticmethod
     def load_values(path: str):
         values = np.load(path)
@@ -26,7 +29,7 @@ class PostHocEstimator:
         mu = statistics.mean(data)
         sigma = statistics.stdev(data)
         for i, el in enumerate(data):
-            data[i] = (el-mu)/sigma
+            data[i] = (el - mu) / sigma
         return data
 
     @staticmethod
@@ -35,7 +38,7 @@ class PostHocEstimator:
             raise ValueError("signal and groundtruth must be of same length for rms calculation")
         acc = 0
         for i in range(len(groundtruth)):
-            acc += math.pow((signal[i]-groundtruth[i]), 2)
+            acc += math.pow((signal[i] - groundtruth[i]), 2)
         return math.sqrt(acc / len(groundtruth))
 
     @staticmethod
@@ -43,15 +46,15 @@ class PostHocEstimator:
         acc = 0
         for i in range(len(deviations)):
             acc += math.pow((deviations[i]), 2)
-        return math.sqrt(acc/len(deviations))
+        return math.sqrt(acc / len(deviations))
 
     @staticmethod
     def generate_reference():
         reference = []
-        for i in range(45):
+        for i in range(75):
             reference.append((1 / 1.8) * 100)
 
-        for i in range(155):
+        for i in range(100):
             reference.append((1 / 2) * 100)
 
         for i in range(80):
@@ -103,8 +106,8 @@ class PostHocEstimator:
             plt.scatter(y, posest_2, color="green", s=2)
 
         plt.legend()
-        plt.xlabel("update steps [update frequency 10Hz]")
-        plt.ylabel("cumulative displacement in mm")
+        plt.xlabel("update steps ")
+        plt.ylabel("displacement along centerline [mm]")
         plt.savefig("groundtruth vs. pf estimate.svg")
         np.save("best cluster means", np.array(posest))
         np.save("best cluster variances", np.array(err))
@@ -121,7 +124,6 @@ class PostHocEstimator:
         logging.info("Sem of Mean absolute deviation of PF estimate from groundtruth in mm = " + str(sem(acc)))
         logging.info("Mean particle dispersion at each time step as sem of dominant cluster = " + str(sem(err)))
         plt.clf()
-
 
     @staticmethod
     def calculate_and_save_trajectory_as_csv(self,
@@ -155,7 +157,7 @@ class PostHocEstimator:
                  "duration of update step"])
             for i in range(length):
                 cumulative_displacements.append(cumulative_displacements[i] + displacements[i])
-                logging.info("Groundtruth = " + str(groundtruth[i+1]))
+                logging.info("Groundtruth = " + str(groundtruth[i + 1]))
                 start = time.time()
                 model.update_model(displacement=displacements[i],
                                    impedance=impedance[i])
@@ -163,12 +165,12 @@ class PostHocEstimator:
                 position_estimate = model.estimate_current_position_dbscan()
                 position_estimates.append(position_estimate)
                 print("Best position estimate cluster: " + str(position_estimates[i]))
-                devations_from_groundtruth.append(position_estimate.get_first_cluster_mean() - groundtruth[i+1])
+                devations_from_groundtruth.append(position_estimate.get_first_cluster_mean() - groundtruth[i + 1])
                 writer.writerow([str(i + 1),
                                  str(displacements[i]),
                                  str(impedance[i]),
-                                 str(groundtruth[i+1]),
-                                 str(position_estimate.get_first_cluster_mean() - groundtruth[i+1]),
+                                 str(groundtruth[i + 1]),
+                                 str(position_estimate.get_first_cluster_mean() - groundtruth[i + 1]),
                                  str(position_estimate.get_first_cluster_mean()),
                                  str(position_estimate.get_first_cluster_error()),
                                  str(position_estimate.get_second_cluster_mean()),
@@ -189,11 +191,12 @@ class PostHocEstimator:
             f.write(str(self.rms(signal=cumulative_displacements[1:], groundtruth=groundtruth[1:])))
             cumulative_displacements_transformed = [groundtruth[0]]
             for i in range(len(displacements)):
-                cumulative_displacements_transformed.append(displacements[i]*1.4 + cumulative_displacements_transformed[i])
+                cumulative_displacements_transformed.append(
+                    displacements[i] * self.alpha_center + cumulative_displacements_transformed[i])
             f.write("\n\n")
-            f.write("The rms value of the deviation of the displacement multiplied with alpha from the groundtruth is: \n")
+            f.write(
+                "The rms value of the deviation of the displacement multiplied with alpha from the groundtruth is: \n")
             f.write(str(self.rms(signal=cumulative_displacements_transformed[1:], groundtruth=groundtruth[1:])))
-
 
     def estimate_post_hoc_catheter_trajectory(self,
                                               reference_path: str,
@@ -204,21 +207,25 @@ class PostHocEstimator:
                                               filename: str,
                                               number_of_particles: int = 10000,
                                               initial_position_variance: float = 0.5,
-                                              alpha_center: float = 1.5,
+                                              alpha_center: float = 2,
                                               alpha_variance: float = 0.1,
                                               offset_groundtruth_bioelectric=0.0,
                                               measurement_type: MeasurementType = MeasurementType.AHISTORIC,
                                               injector_type: InjectorType = InjectorType.ALPHA_VARIANCE
                                               ):
+        self.alpha_center = alpha_center
+        print("Alpha:" + str(self.alpha_center))
         print("LOADING REFERENCE FROM: " + reference_path)
-        #ref = self.normalize_values(self.load_values(reference_path))
-        ref = self.normalize_values(self.generate_reference())
+        ref = self.normalize_values(self.load_values(reference_path))
+        #ref = self.normalize_values(self.generate_reference())
 
         print("LOADING IMPEDANCE FROM: " + impedance_path)
         impedance = self.normalize_values(self.load_values(impedance_path))
 
         print("LOADING GROUNDTRUTH FROM: " + groundtruth_path)
         groundtruth = self.load_values(groundtruth_path)
+        # correcting the offset between
+        groundtruth = list(np.array(groundtruth) + offset_groundtruth_bioelectric)
 
         print("LOADING DISPLACEMENTS FROM: " + displacements_path)
         displacements = self.load_values(displacements_path)
@@ -230,9 +237,9 @@ class PostHocEstimator:
                            filename=filename + "_log")
         model.setup_particle_filter(reference=ref,
                                     measurement_model=measurement_type,
-                                    injector_type=injector_type)
+                                    injector_type=injector_type, alpha_center=alpha_center)
         model.setup_particles(number_of_particles=number_of_particles,
-                              initial_position_center=groundtruth[0] + offset_groundtruth_bioelectric,
+                              initial_position_center=groundtruth[0],
                               inital_position_variance=initial_position_variance,
                               alpha_center=alpha_center,
                               alpha_variance=alpha_variance
@@ -250,20 +257,20 @@ if __name__ == "__main__":
 
     estimator = PostHocEstimator()
 
-    samples = ["27"]
+    # samples = ["20", "25", "27", "29", "30", "31", "34", "35"]
+    # samples = ["54", "44", "46", "55", "56", "57", "59"]
+    samples = [str(x) for x in range(39, 60)]
     for sample_nr in samples:
         print("[STARTING TO CALCULATE POST HOC PATH FOR SAMPLE " + sample_nr + "] \n\n")
 
-        base_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + \
-                    sample_nr + "\\data_sample_" + sample_nr + "\\"
+        #base_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\"
 
-        ref_path = base_path + "reference.npy"
-        imp_path = base_path + "impedance_sample"+sample_nr+".npy"
-        grtruth_path = base_path + "groundtruth_"+sample_nr+"_cropped.npy"
-        displace_path = base_path + "displacements_sample"+sample_nr+".npy"
+        ref_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\"+ "reference.npy"
+        imp_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\coregistration_" + sample_nr + "\\data_bioelectric_sensors"+ "\\impedance_interpolated_" + sample_nr + ".npy"
+        grtruth_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\coregistration_" + sample_nr + "\\data_bioelectric_sensors"+"\\em_interpolated_" + sample_nr + ".npy"
+        displace_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\coregistration_" + sample_nr + "\\data_bioelectric_sensors"+"\\displacements_interpolated_" + sample_nr + ".npy"
 
-        dest_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + \
-                    sample_nr + "\\results_sample_" + sample_nr + "\\"
+        dest_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\coregistration_" + sample_nr + "\\results_sample_"+ sample_nr + "\\"
         file = "phantom_sample_" + sample_nr
 
         estimator.estimate_post_hoc_catheter_trajectory(reference_path=ref_path,
@@ -273,8 +280,8 @@ if __name__ == "__main__":
                                                         destination_path=dest_path,
                                                         filename=file,
                                                         number_of_particles=1000,
-                                                        initial_position_variance=0.5,
-                                                        alpha_center=1.4,
+                                                        initial_position_variance=0.1,
+                                                        alpha_center=1,
                                                         alpha_variance=0.1,
                                                         offset_groundtruth_bioelectric=3,
                                                         measurement_type=MeasurementType.AHISTORIC,

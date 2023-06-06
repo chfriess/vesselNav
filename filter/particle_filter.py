@@ -22,26 +22,6 @@ class ParticleFilter:
         self.displacement_history = []
         self.impedance_history = []
 
-    def catheter_is_moving(self) -> bool:
-        if len(self.displacement_history) < 5:
-            return True
-        test_result = stats.ttest_1samp(self.displacement_history[-5:], popmean=0)
-        """
-        if p value is smaller than 0.1, the average displacement is  significantly different from 0
-        then, the catheter is moving 
-        """
-        return test_result[1] < 0.1
-
-    def contains_impedance_information(self):
-        imp_err = 125
-        if len(self.impedance_history) < 5:
-            return True
-        elif statistics.stdev(self.impedance_history[-5:]) > imp_err:
-            return True
-        else:
-            return False
-
-
     def get_reference(self):
         return self.measurement_strategy.get_reference()
 
@@ -58,8 +38,6 @@ class ParticleFilter:
                impedance_measurement: float) -> ParticleSet:
         self.displacement_history.append(displacement_measurement)
         self.impedance_history.append(impedance_measurement)
-        if not self.catheter_is_moving():
-            return previous_particle_set
 
         prediction_particle_set = self.motion_model.move_particles(
             previous_particle_set=previous_particle_set,
@@ -67,8 +45,7 @@ class ParticleFilter:
 
         weighted_particle_set = self.measurement_strategy.weight_particles(
             particles=prediction_particle_set,
-            measurement=self.normalize_impedance(impedance_measurement=impedance_measurement,
-                                                 displacement_measurement=displacement_measurement))
+            measurement=impedance_measurement)
 
         resampled_particle_set = self.resampler.resample(weighted_particle_set)
         return self.injector.inject(resampled_particle_set)

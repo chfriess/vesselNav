@@ -49,9 +49,10 @@ class Model:
                               reference: list,
                               measurement_model: MeasurementType,
                               injector_type: InjectorType,
+                              alpha_center: float
                               ):
         if injector_type == InjectorType.ALPHA_VARIANCE:
-            injection_strategy = AlphaVariationInjector(map_borders=[0, len(reference)])
+            injection_strategy = AlphaVariationInjector(map_borders=[0, len(reference)], alpha_center=alpha_center)
             logging.info("injector: alpha variance")
         elif injector_type == InjectorType.RANDOM_PARTICLE:
             injection_strategy = RandomParticleInjector(map_borders=[0, len(reference)])
@@ -131,13 +132,12 @@ class Model:
             displacement_measurement=displacement,
             impedance_measurement=impedance)
         for particle in self.particles:
-            logging.debug("UpdatedParticle: " + str(particle))
+            logging.debug("UpdatedParticle: " + str(particle.get_state()))
         logging.info("Number of Particles: " + str(len(self.particles)))
         self.update_steps += 1
 
     def estimate_current_position_dbscan(self) -> ClusterPositionEstimate:
-        positions = [particle.state.position for particle in
-                     self.particles]  # TODO: change to vessel tree position estimate
+        positions = [particle.state.position for particle in self.particles]
         reshaped_positions = np.reshape(positions, (-1, 1))
         clustering1 = DBSCAN(eps=3, min_samples=2).fit(reshaped_positions)
 
