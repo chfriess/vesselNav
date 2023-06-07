@@ -17,3 +17,8 @@ class State3D(State):
     def get_position(self):
         return [self.branch, self.position]
 
+    def set_position(self, position: float):
+        self.position = position
+
+    def set_branch(self, branch: int):
+        self.branch = branch

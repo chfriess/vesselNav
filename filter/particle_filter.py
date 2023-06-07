@@ -1,13 +1,13 @@
-from motion_models.motion_model import MotionModel
 from strategies.injection_strategy import InjectionStrategy
 from strategies.measurement_strategy import MeasurementStrategy
+from strategies.motion_strategy import MotionStrategy
 from strategies.resampling_strategy import ResamplingStrategy
 from utils.particle_set import ParticleSet
 
 
 class ParticleFilter:
     def __init__(self,
-                 motion_model: MotionModel,
+                 motion_model: MotionStrategy,
                  measurement_strategy: MeasurementStrategy,
                  resampler: ResamplingStrategy,
                  injector: InjectionStrategy) -> None:

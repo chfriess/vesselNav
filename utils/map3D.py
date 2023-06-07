@@ -52,3 +52,4 @@ class Map3D:
         if not successor_indices:
             raise ValueError("No vessel with index " + str(index) + "found in the map")
         return successor_indices
+
