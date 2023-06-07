@@ -1,174 +1,50 @@
-import csv
-import logging
+from estimators.post_hoc_estimator import PostHocEstimator
+from utils.particle_filter_component_enums import MeasurementType, InjectorType
 
-import matplotlib
-import numpy as np
-import os
-import time
-from numpy import random
-import matplotlib.pyplot as plt
-from scipy.stats import sem
-from statistics import mean
+if __name__ == "__main__":
 
-from filter.model import Model
-from filter.particle_filter import ParticleFilter
-from injectors.AlphaVarianceInjector import AlphaVariationInjector
-from measurement_models.ahistoric_measurement_model import AhistoricMeasurementModel
-from motion_models.motion_model import MotionModel
-from resamplers.low_variance_resampler import LowVarianceResampler
-from utils.particle import Particle
-from utils.particle_set import ParticleSet
-from utils.state import State
+    estimator = PostHocEstimator()
+    samples = ["20", "25", "27", "29", "30", "31", "34", "35"]  # samples for agar phantom
 
-os.chdir("C:\\Users\\Chris\\OneDrive\\Desktop\\")
-logging.basicConfig(
-    filename='particleFilterLog.log',
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S')
+    # samples = [str(x) for x in range(39, 60)]  # samples for plastic phantom
+    for sample_nr in samples:
+        print("[STARTING TO CALCULATE POST HOC PATH FOR SAMPLE " + sample_nr + "] \n\n")
+        """
+        PLASTIC PHANTOM PATHS
 
+        ref_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\"+ "reference.npy"
+        imp_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\coregistration_" 
+        + sample_nr + "\\data_bioelectric_sensors"+ "\\impedance_interpolated_" + sample_nr + ".npy"
+        grtruth_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\
+        coregistration_" + sample_nr + "\\data_bioelectric_sensors"+"\\em_interpolated_" + sample_nr + ".npy"
+        displace_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\
+        coregistration_" + sample_nr + "\\data_bioelectric_sensors"+"\\displacements_interpolated_" + sample_nr + ".npy"
 
-def setup_model(reference: list) -> Model:
-    particle_filter = setup_particle_filter(reference=reference)
-    particles = setup_initial_particle_set()
-    return Model(particle_filter=particle_filter,
-                 particles=particles,
-                 loglevel=logging.INFO,
-                 log_directory="C:\\Users\\Chris\\OneDrive\\Desktop\\")
+        dest_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\coregistration_"
+         + sample_nr + "\\results_sample_"+ sample_nr + "\\"
+        """
+        ref_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\" + "reference_from_iliaca.npy"
+        imp_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr + "\\data_sample_" \
+                   + sample_nr + "\\impedance_from_iliaca.npy"
+        grtruth_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr + \
+                       "\\data_sample_" + sample_nr + "\\groundtruth_from_iliaca.npy"
+        displace_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
+                        + "\\data_sample_" + sample_nr + "\\displacements_from_iliaca.npy"
+        dest_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
+                    + "\\results_sample_" + sample_nr + "\\"
+        file = "phantom_sample_" + sample_nr
 
-
-def setup_particle_filter(reference: list) -> ParticleFilter:
-    motion_model = MotionModel()
-    measurement_model = AhistoricMeasurementModel(reference_signal=reference)
-    resampler = LowVarianceResampler()
-    injector = AlphaVariationInjector(map_borders=[0, len(reference)])
-
-    return ParticleFilter(motion_model=motion_model,
-                          measurement_strategy=measurement_model,
-                          resampler=resampler,
-                          injector=injector)
-
-
-def setup_initial_particle_set() -> ParticleSet:
-    particles = ParticleSet()
-    for index in range(1000):
-        state = State(position=0)  # TODO: change to vessel tree position estimate
-        particle = Particle(state=state, weight=0)
-        particles.append(particle)
-    return particles
-
-
-def load_values(path: str) -> list:
-    with open(path) as f:
-        values_string = f.readline()
-        values_list = values_string.split(", ")
-        values_list = [float(x) for x in values_list]
-        return values_list
-
-
-def simulate_impedance(refdata: list) -> list:
-    simulated_impedance = [random.normal(loc=refdata[0], scale=refdata[0] * 0.01)]
-    for x in range(1, len(refdata)):
-        simulated_impedance.append(random.normal(loc=refdata[x], scale=refdata[x] * 0.01))
-    return simulated_impedance
-
-
-def simulate_displacement(length: int) -> list:
-    d = [0]
-    for x in range(1, length):
-        d.append(random.normal(loc=0.5, scale=0.01))
-    return d
-
-
-def simulate_reference(path: str) -> list:  # TODO: change to vessel tree position estimate
-    imp = np.load(path)
-    return list(imp)
-
-
-def simulate_position_groundtruth(length: int) -> list:  # TODO: change to vessel tree position estimate
-    gt = [x for x in range(length)]
-    return gt
-
-
-def display_simulation_results(grtruth: list, pfestimates: list):  # TODO: change to vessel tree position estimate
-    posest = []
-    err = []
-
-    for clusterPositionEstimate in pfestimates: # TODO: change to vessel tree position estimate
-        posest.append(clusterPositionEstimate.first_cluster.center)
-        err.append(clusterPositionEstimate.first_cluster.error)
-    x = [p for p in range(len(grtruth))]
-    y = [l for l in range(len(posest))]
-
-    font = {'family': 'normal',
-            'size': 14}
-
-    matplotlib.rc('font', **font)
-
-    plt.plot(x, grtruth, color="black", label="groundtruth")
-    plt.plot(y, posest, color="blue", label="PF position estimate")
-    plt.errorbar(y, posest, yerr=err, fmt="o", color="blue", capsize=4)
-
-    plt.legend()
-    plt.xlabel("update steps [update frequency 10Hz]")
-    plt.ylabel("cumulative displacement in mm")
-    plt.show()
-
-    acc = []
-    for index in range(len(grtruth)):
-        acc.append(posest[index] - grtruth[index])
-    logging.info(
-        "final difference estimate vs. groundtruth = " + str(grtruth[-1] - pfestimates[-1].first_cluster.center))
-    logging.info("Mean absolute deviation of PF estimate from groundtruth in mm = " + str(mean(acc)))
-    logging.info("Sem of Mean absolute deviation of PF estimate from groundtruth in mm = " + str(sem(acc)))
-    logging.info("Mean particle dispersion at each time step as sem of dominant cluster = " + str(sem(err)))
-
-
-if __name__ == '__main__':
-    data_vault_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\Bachelorarbeit\\Data\\Simulated " \
-                      "Data\\data\\br1\\catheter_trajectory_original_simulated_signal.npy"
-
-    ref = simulate_reference(data_vault_path)
-    impedance = simulate_impedance(ref)
-    groundtruth = simulate_position_groundtruth(len(impedance))  # TODO: change to vessel tree position estimate
-    displacements = simulate_displacement(len(impedance))
-
-    for i in range(len(ref)):
-        print("Reference= " + str(ref[i]) + "|  impedance= " + str(impedance[i]) + "|  displacements= " + str(
-            displacements[i]) + "|  groundtruth= " + str(groundtruth[i]))
-
-    position_estimate = []
-
-    model = setup_model(reference=ref)
-    length = len(displacements) if len(displacements) < len(impedance) else len(impedance)
-    position_estimate.append(model.estimate_current_position_dbscan())
-
-    acc = 0
-    with open("C:\\Users\\Chris\\OneDrive\\Desktop\\test.csv", 'w') as file:
-        writer = csv.writer(file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(["Update step #",	"Displacement",	"Impedance",	"Groundtruth", "PF - Groundtruth",	"first cluster mean",	"first cluster error",	"second cluster mean",	"second cluster error"	,"number of clusters"	,"number of noise points"])
-
-        for i in range(length):
-            logging.info("Groundtruth = " + str(groundtruth[i]))
-            start = time.time()
-            model.update_model(displacement=displacements[i],
-                               impedance=impedance[i])
-            end = time.time()
-            acc += (end - start)
-            pos_est = model.estimate_current_position_dbscan()
-            position_estimate.append(pos_est)
-            print("Best position estimate cluster: " + str(position_estimate[i]))
-            print("Position estimate total mean" + str(model.estimate_current_position_mean()))
-            writer.writerow([str(i+1),
-                             str(displacements[i]),
-                             str(impedance[i]),
-                             str(groundtruth[i]),
-                             str(pos_est.get_first_cluster_mean() - groundtruth[i]),
-                             str(pos_est.get_first_cluster_mean()),
-                             str(pos_est.get_first_cluster_error()),
-                             str(pos_est.get_second_cluster_mean()),
-                             str(pos_est.get_second_cluster_error()),
-                             str(pos_est.number_of_clusters),
-                             str(pos_est.number_of_noise)])
-
-        display_simulation_results(groundtruth, position_estimate)
+        estimator.estimate_post_hoc_catheter_trajectory(reference_path=ref_path,
+                                                        impedance_path=imp_path,
+                                                        groundtruth_path=grtruth_path,
+                                                        displacements_path=displace_path,
+                                                        destination_path=dest_path,
+                                                        filename=file,
+                                                        number_of_particles=1000,
+                                                        initial_position_variance=0.1,
+                                                        alpha_center=2,
+                                                        alpha_variance=0.1,
+                                                        offset_groundtruth_bioelectric=-3,
+                                                        measurement_type=MeasurementType.AHISTORIC,
+                                                        injector_type=InjectorType.ALPHA_VARIANCE)
+        print("[FINISHED CALCULATING POST HOC PATH FOR SAMPLE " + sample_nr + "] \n\n")

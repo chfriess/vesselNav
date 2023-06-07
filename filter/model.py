@@ -1,13 +1,9 @@
 from collections import OrderedDict
-import random
-
 import numpy as np
-
 import logging
 from scipy.stats import sem
 from statistics import mean
 from sklearn.cluster import DBSCAN
-
 from filter.particle_filter import ParticleFilter
 from injectors.AlphaVarianceInjector import AlphaVariationInjector
 from injectors.RandomParticleInjector import RandomParticleInjector
@@ -92,7 +88,6 @@ class Model:
         if isinstance(self.particle_filter.measurement_strategy, AhistoricMeasurementModel):
             for index in range(number_of_particles):
                 state = State()
-                #state.position = random.uniform(1.5, 2)
                 state.assign_random_position(center=initial_position_center, variance=inital_position_variance)
                 state.assign_random_alpha(center=alpha_center, variance=alpha_variance)
                 particle = Particle(state=state, weight=0)
@@ -100,7 +95,6 @@ class Model:
         if isinstance(self.particle_filter.measurement_strategy, SlidingDTWMeasurementModel):
             for index in range(number_of_particles):
                 state = State()
-                #state.position = random.uniform(1.5, 2)
                 state.assign_random_position(center=initial_position_center, variance=inital_position_variance)
                 particle = SlidingParticle(state=state, weight=0)
                 self.particles.append(particle)
@@ -136,6 +130,11 @@ class Model:
         logging.info("Number of Particles: " + str(len(self.particles)))
         self.update_steps += 1
 
+    @staticmethod
+    def get_values_length(d):
+        key, values = d
+        return len(values)
+
     def estimate_current_position_dbscan(self) -> ClusterPositionEstimate:
         positions = [particle.state.position for particle in self.particles]
         reshaped_positions = np.reshape(positions, (-1, 1))
@@ -153,7 +152,7 @@ class Model:
         for index in cluster_indices:
             d[index] = [y for (x, y) in list(zip(labels, positions)) if x == index]
 
-        od = OrderedDict(sorted(d.items(), key=get_values_length, reverse=True))
+        od = OrderedDict(sorted(d.items(), key=self.get_values_length, reverse=True))
         first_cluster = None
         second_cluster = None
         if len(od) > 0:
@@ -182,7 +181,10 @@ class Model:
         logging.info("Best Position Estimate mean/sem = " + str(position_estimate) + "\n")
         return position_estimate
 
+    def get_current_average_alpha(self) -> float:
+        alphas = []
+        for particle in self.particles:
+            alphas.append(particle.state.alpha)
+        return mean(alphas)
 
-def get_values_length(d):
-    key, values = d
-    return len(values)
+

@@ -14,8 +14,6 @@ class RandomParticleInjector(InjectionStrategy):
         particles = self.remove_number_of_worst_particles(particles=particles,
                                                           number_to_remove=number_injected_particles)
         for index in range(number_injected_particles):
-            # TODO: how to correctly inject the MatchingMatrix? or is this even necessary?
             particles.append(Particle(State(position=random.uniform(self.map_borders[0], self.map_borders[1]),
                                             alpha=2)))
-
         return particles

@@ -26,8 +26,6 @@ class LowVarianceResampler(ResamplingStrategy):
             while accumulator > cumulative_weights[i]:
                 i += 1
                 if i > len(cumulative_weights)-1:
-                    # TODO: change print to logger
-                    print("ERROR OCCURRED - Ov")
                     if len(resampled_particle_set) < len(weighted_particle_set):
                         resampled_particle_set.append(weighted_particle_set[0])
                         return resampled_particle_set

@@ -2,7 +2,6 @@ import math
 import statistics
 import sys
 from abc import abstractmethod
-
 from utils.particle_set import ParticleSet
 
 
@@ -16,7 +15,6 @@ class MeasurementStrategy:
 
     @abstractmethod
     def raw_weight_particles(self, particles: ParticleSet, measurement: float) -> ParticleSet:
-        # expects NOT correct weights! so the more important the particle is, the lower the weight=error has to be!
         raise NotImplementedError
 
     @abstractmethod
@@ -31,8 +29,6 @@ class MeasurementStrategy:
         except statistics.StatisticsError:
             print("Statistics Error occurred")
             print(len(particles))
-
-        # TODO: check better version for this temporary hack
         if sigma == 0:
             sigma = 1
         for particle in particles:
@@ -48,7 +44,6 @@ class MeasurementStrategy:
 
     @staticmethod
     def sigmoid_transform(x: float) -> float:
-        # TODO: first check whether it is correct now, then remove the exception based control structure!
         try:
             acc = 1 + math.e ** (-x)
         except OverflowError:
@@ -82,6 +77,5 @@ class MeasurementStrategy:
             if particle.weight != 0:
                 particle.weight = 1 / particle.weight
             else:
-                # TODO: better way to determine best particles weight
                 particle.weight = 10_000
         return particles

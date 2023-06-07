@@ -1,7 +1,3 @@
-import statistics
-
-from scipy import stats
-
 from motion_models.motion_model import MotionModel
 from strategies.injection_strategy import InjectionStrategy
 from strategies.measurement_strategy import MeasurementStrategy
@@ -24,13 +20,6 @@ class ParticleFilter:
 
     def get_reference(self):
         return self.measurement_strategy.get_reference()
-
-    @staticmethod
-    def normalize_impedance(displacement_measurement: float,
-                            impedance_measurement: float) -> float:
-        if displacement_measurement == 0:
-            return impedance_measurement
-        return impedance_measurement / abs(displacement_measurement)
 
     def filter(self,
                previous_particle_set: ParticleSet,

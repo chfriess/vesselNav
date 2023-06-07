@@ -18,7 +18,6 @@ class AlphaVariationInjector(InjectionStrategy):
         self.alpha_center = alpha
 
     def inject(self, particles: ParticleSet) -> ParticleSet:
-        # TODO check why choosing percentage_of_particles_injected instead of hardcoded number yields a warning
         number_injected_particles = int(len(particles) * 0.05)
         particles.sort_ascending_by_weight()
         for index in range(number_injected_particles):

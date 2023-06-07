@@ -52,7 +52,8 @@ class OnlineEstimator:
                                 filename=filename + "_log")
         self.model.setup_particle_filter(reference=ref,
                                          measurement_model=measurement_type,
-                                         injector_type=injector_type)
+                                         injector_type=injector_type,
+                                         alpha_center=alpha_center)
         self.model.setup_particles(number_of_particles=number_of_particles,
                                    initial_position_center=initial_position_center,
                                    inital_position_variance=initial_position_variance,

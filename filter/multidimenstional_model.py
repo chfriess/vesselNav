@@ -197,6 +197,11 @@ class MultidimensionalModel:
 
         self.update_steps += 1
 
+    @staticmethod
+    def get_values_length(d):
+        key, values = d
+        return len(values)
+
     def estimate_current_position_dbscan_in_single_branch(self, positions) -> ClusterPositionEstimate:
         """
         positions = [particle.state.position for particle in
@@ -217,7 +222,7 @@ class MultidimensionalModel:
         for index in cluster_indices:
             d[index] = [y for (x, y) in list(zip(labels, positions)) if x == index]
 
-        od = OrderedDict(sorted(d.items(), key=get_values_length, reverse=True))
+        od = OrderedDict(sorted(d.items(), key=self.get_values_length, reverse=True))
         first_cluster = None
         second_cluster = None
         if len(od) > 0:
@@ -238,8 +243,3 @@ class MultidimensionalModel:
                                                                              position_estimate)
         logging.info("Best Position Estimate mean/sem = " + str(multidim_position_estimate) + "\n")
         return multidim_position_estimate
-
-
-def get_values_length(d):
-    key, values = d
-    return len(values)
