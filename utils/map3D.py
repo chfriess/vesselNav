@@ -35,6 +35,12 @@ class Map3D:
             raise ValueError("The mapping must consist of tuples containing 2 integer values")
         self.mappings.append(mapping)
 
+    def get_vessels(self):
+        return self.vessels
+
+    def get_mappings(self):
+        return self.mappings
+
     def get_vessel(self, index: int) -> list:
         return self.vessels[index]
 

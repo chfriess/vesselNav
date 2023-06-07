@@ -5,8 +5,8 @@ from scipy.stats import sem
 from statistics import mean
 from sklearn.cluster import DBSCAN
 from filter.particle_filter import ParticleFilter
-from injectors.AlphaVarianceInjector import AlphaVariationInjector
-from injectors.RandomParticleInjector import RandomParticleInjector
+from injectors.alpha_variance_injector import AlphaVariationInjector
+from injectors.random_particle_injector import RandomParticleInjector
 from measurement_models.ahistoric_measurement_model import AhistoricMeasurementModel
 from measurement_models.sliding_dtw_measurement_model import SlidingDTWMeasurementModel
 from motion_models.motion_model import MotionModel

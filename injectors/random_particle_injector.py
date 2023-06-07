@@ -9,6 +9,10 @@ from particles.state import State
 
 class RandomParticleInjector(InjectionStrategy):
 
+    def __init__(self,
+                 map_borders: list):
+        self.map_borders = map_borders
+
     def inject(self, particles: ParticleSet) -> ParticleSet:
         number_injected_particles = int(len(particles) * 0.05)
         particles = self.remove_number_of_worst_particles(particles=particles,
