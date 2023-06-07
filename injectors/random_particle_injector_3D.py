@@ -23,3 +23,6 @@ class RandomParticleInjector3D(InjectionStrategy):
             particle = Particle(state=state)
             particles.append(particle=particle)
         return particles
+
+# TODO 3D: 3D cluster position estimate, 3D model, generate 3D cluster position estimate
+# TODO 3D: 3D post hoc estimator, 3D online estimator
