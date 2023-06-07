@@ -2,9 +2,9 @@
 from numpy import random
 
 from strategies.injection_strategy import InjectionStrategy
-from utils.particle import Particle
+from particles.particle import Particle
 from utils.particle_set import ParticleSet
-from utils.state import State
+from particles.state import State
 
 
 class RandomParticleInjector(InjectionStrategy):

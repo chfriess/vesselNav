@@ -1,5 +1,5 @@
 from strategies.measurement_strategy import MeasurementStrategy
-from utils.particle import Particle
+from particles.particle import Particle
 from utils.particle_set import ParticleSet
 
 

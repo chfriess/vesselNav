@@ -1,4 +1,4 @@
-from utils.particle import Particle
+from particles.particle import Particle
 
 
 class ParticleSet(object):

@@ -1,5 +1,5 @@
-from utils.particle import Particle
-from utils.state import State
+from particles.particle import Particle
+from particles.state import State
 
 
 class SlidingParticle(Particle):

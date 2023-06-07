@@ -2,7 +2,8 @@ from numpy import random
 
 
 class State:
-    def __init__(self, position: float = 0,
+    def __init__(self,
+                 position: float = 0,
                  alpha: float = 0) -> None:
         self.position = position
         if alpha != 0:

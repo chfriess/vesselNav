@@ -1,4 +1,4 @@
-from utils.state import State
+from particles.state import State
 
 
 class Particle:
@@ -23,6 +23,9 @@ class Particle:
 
     def get_state(self):
         return self.state
+
+    def get_position(self):
+        return self.state.get_position()
 
     def get_weight(self):
         return self.weight

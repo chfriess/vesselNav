@@ -13,11 +13,11 @@ from motion_models.motion_model import MotionModel
 from resamplers.low_variance_resampler import LowVarianceResampler
 from utils.cluster_position_estimate import ClusterPositionEstimate
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
-from utils.particle import Particle
+from particles.particle import Particle
 from utils.particle_set import ParticleSet
 from utils.position_estimate import PositionEstimate
-from utils.sliding_particle import SlidingParticle
-from utils.state import State
+from particles.sliding_particle import SlidingParticle
+from particles.state import State
 
 
 class Model:
