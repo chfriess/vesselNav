@@ -10,7 +10,10 @@ from resamplers.low_variance_resampler import LowVarianceResampler
 from utils.map3D import Map3D
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
 from utils.particle_set import ParticleSet
-from utils.position_estimate import PositionEstimate
+from utils.position import Position3D
+from utils.position_estimate import PositionEstimate, ClusterPositionEstimate3D
+from scipy.stats import sem
+from statistics import mean
 import logging
 
 
@@ -33,9 +36,8 @@ class Model3D(ModelInterface):
             logging.info("measurement model: ahistoric")
         else:
             raise ValueError("Select a valid measurement strategy: ahistoric ")
-        motion_model = MotionModel3D()
+        motion_model = MotionModel3D(map3D=map3D)
         resampling_strategy = LowVarianceResampler()
-
         self.particle_filter = ParticleFilter(motion_model=motion_model,
                                               measurement_strategy=measurement_strategy,
                                               resampler=resampling_strategy,
@@ -62,10 +64,20 @@ class Model3D(ModelInterface):
                 particle = Particle3D(state=state, weight=0)
                 self.particles.append(particle)
 
-
-    def update_model(self, displacement: float, impedance: float) -> None:
-        pass
-
-    @staticmethod
     def estimate_current_position(self) -> PositionEstimate:
-        pass
+        position_estimate = ClusterPositionEstimate3D()
+        particles_per_branch = {}
+        for particle in self.particles:
+            branch = particle.get_position()["branch"]
+            if branch not in particles_per_branch.keys():
+                particles_per_branch[branch] = [particle.get_position()["displacement"]]
+            else:
+                particles_per_branch[branch].append(particle.get_position()["displacement"])
+
+        for key in particles_per_branch.keys():
+            for cluster in self.calculate_clusters_in_particle_set(particles_per_branch[key]):
+                position_estimate.add_cluster(Position3D(center=mean(cluster),
+                                                         error=sem(cluster),
+                                                         number_of_particles=len(cluster),
+                                                         branch=key))
+        return position_estimate

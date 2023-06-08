@@ -43,20 +43,21 @@ class MotionModel3D(MotionStrategy):
         error = self.calculate_displacement_error(self.displacement_history)
 
         for particle in previous_particle_set:
-            position_estimate = particle.get_position()[0] + (displacement_measurement * particle.state.alpha)
-            if 0 < position_estimate < len(self.map3D.get_vessel(particle.get_position()[1])):
+            position_estimate = particle.get_position()["position"] + (displacement_measurement * particle.state.alpha)
+            if 0 < position_estimate < len(self.map3D.get_vessel(particle.get_position()["branch"])):
                 particle.state.set_position(random.normal(loc=position_estimate, scale=error))
             elif position_estimate < 0:
-                predecessor_index = self.map3D.get_index_of_predecessor(particle.get_position()[0])
+                predecessor_index = self.map3D.get_index_of_predecessor(particle.get_position()["position"])
                 predecessor = self.map3D.get_vessel(predecessor_index)
                 position_estimate = len(predecessor) - 1 + position_estimate
                 particle.state.set_position(random.normal(loc=position_estimate, scale=error))
                 particle.state.set_branch(predecessor_index)
             else:
-                successor_indices = self.map3D.get_indices_of_successors(particle.get_position()[0])
+                successor_indices = self.map3D.get_indices_of_successors(particle.get_position()["position"])
                 successor_index = random.choice(successor_indices)
                 particle.state.set_position(random.normal(
-                    loc=position_estimate - len(self.map3D.get_vessel(particle.get_position()[0])), scale=error))
+                    loc=position_estimate - len(self.map3D.get_vessel(
+                        particle.get_position()["position"])), scale=error))
                 particle.state.set_branch(successor_index)
 
         return previous_particle_set

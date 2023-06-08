@@ -1,6 +1,9 @@
 from abc import abstractmethod
 import logging
+from collections import OrderedDict
 from statistics import mean
+import numpy as np
+from sklearn.cluster import DBSCAN
 from filter.particle_filter import ParticleFilter
 from utils.map3D import Map3D
 from utils.position_estimate import PositionEstimate
@@ -57,9 +60,18 @@ class ModelInterface:
 
         logger.addHandler(file_handler)
 
-    @abstractmethod
     def update_model(self, displacement: float, impedance: float) -> None:
-        raise NotImplementedError
+        logging.info("Update step #: " + str(self.update_steps))
+        logging.info("Displacement measurement: " + str(displacement))
+        logging.info("Impedance measurement: " + str(impedance))
+        self.particles = self.particle_filter.filter(
+            previous_particle_set=self.particles,
+            displacement_measurement=displacement,
+            impedance_measurement=impedance)
+        for particle in self.particles:
+            logging.debug("UpdatedParticle: " + str(particle.get_state()))
+        logging.info("Number of Particles: " + str(len(self.particles)))
+        self.update_steps += 1
 
     @staticmethod
     def get_values_length(d):
@@ -76,4 +88,18 @@ class ModelInterface:
             alphas.append(particle.state.alpha)
         return mean(alphas)
 
+    def calculate_clusters_in_particle_set(self, positions) -> OrderedDict:
+        reshaped_positions = np.reshape(positions, (-1, 1))
+        clustering1 = DBSCAN(eps=3, min_samples=2).fit(reshaped_positions)
 
+        labels = clustering1.labels_
+        cluster_indices = list(np.unique(labels))
+
+        if -1 in cluster_indices:
+            cluster_indices.remove(-1)
+        d = {}
+        for index in cluster_indices:
+            d[index] = [y for (x, y) in list(zip(labels, positions)) if x == index]
+
+        clusters = OrderedDict(sorted(d.items(), key=self.get_values_length, reverse=True))
+        return clusters

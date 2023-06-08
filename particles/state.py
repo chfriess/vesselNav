@@ -49,11 +49,19 @@ class State3D(State):
         return f'[Position: {self.position} | Branch: {self.position} | Alpha: {self.alpha}]'
 
     def get_position(self):
-        return [self.branch, self.position]
+
+        return {"branch": self.branch, "displacement": self.position}
 
     def set_position(self, position: float):
         self.position = position
 
     def set_branch(self, branch: int):
         self.branch = branch
+
+    def get_branch(self):
+        return self.branch
+
+    def get_displacement(self):
+        return self.position
+
 

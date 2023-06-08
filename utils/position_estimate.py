@@ -75,8 +75,6 @@ class ClusterPositionEstimate(PositionEstimate):
 
 class ClusterPositionEstimate3D(PositionEstimate):
 
-
-
     def __init__(self,
                  number_of_cluster: int = 0):
         self.clusters = {}
@@ -86,12 +84,11 @@ class ClusterPositionEstimate3D(PositionEstimate):
         pass
 
     def add_cluster(self,
-                    cluster: Position3D,
-                    branch: int):
-        if branch not in self.clusters.keys():
-            self.clusters[branch] = [cluster]
+                    cluster: Position3D):
+        if cluster.branch not in self.clusters.keys():
+            self.clusters[cluster.branch] = [cluster]
         else:
-            self.clusters[branch].append(cluster)
+            self.clusters[cluster.branch].append(cluster)
 
     def get_clusters(self):
         return self.clusters
