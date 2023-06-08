@@ -8,7 +8,8 @@ from filter.particle_filter import ParticleFilter
 from injectors.alpha_variance_injector import AlphaVariationInjector
 from injectors.random_particle_injector import RandomParticleInjector
 from measurement_models.ahistoric_measurement_model import AhistoricMeasurementModel
-from measurement_models.sliding_dtw_measurement_model import SlidingDTWMeasurementModel
+from measurement_models.sliding_dtw_measurement_model import SlidingDTWMeasurementModel, \
+    SlidingDerivativeDTWMeasurementModel
 from motion_models.motion_model import MotionModel
 from resamplers.low_variance_resampler import LowVarianceResampler
 from utils.position_estimate import ClusterPositionEstimate
@@ -62,6 +63,9 @@ class Model:
         elif measurement_model == MeasurementType.SLIDING_DTW:
             measurement_strategy = SlidingDTWMeasurementModel(reference_signal=reference)
             logging.info("measurement model: sliding_dtw")
+        elif measurement_model == MeasurementType.SLIDING_DERIVATIVE_DTW:
+            measurement_strategy = SlidingDerivativeDTWMeasurementModel(reference_signal=reference)
+            logging.info("measurement model: sliding_derivative_dtw")
         else:
             raise ValueError("Select a valid measurement strategy: ahistoric or sliding_dtw")
         motion_model = MotionModel()
@@ -125,7 +129,7 @@ class Model:
             displacement_measurement=displacement,
             impedance_measurement=impedance)
         for particle in self.particles:
-            logging.debug("UpdatedParticle: " + str(particle.get_state()))
+            logging.debug("UpdatedParticle: " + str(particle))
         logging.info("Number of Particles: " + str(len(self.particles)))
         self.update_steps += 1
 

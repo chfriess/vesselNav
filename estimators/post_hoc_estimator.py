@@ -204,6 +204,17 @@ class PostHocEstimator:
                 "The rms value of the deviation of the displacement multiplied with alpha from the groundtruth is: \n")
             f.write(str(self.rms(signal=cumulative_displacements_transformed[1:], groundtruth=groundtruth[1:])))
 
+    @staticmethod
+    def predict_impedance_from_diameter(diameter):
+        # expects diameter in mm, converts it to m
+        diameter = diameter / 1000
+        circumference = diameter * math.pi
+        csa = ((diameter / 2) ** 2) * math.pi
+        sensor_distance = 3 / 1000
+        tissue_conductivity = 0.30709
+        blood_conductivity = 0.7
+        return 1000 * ((csa * blood_conductivity) / sensor_distance + tissue_conductivity * circumference) ** (-1)
+
     def estimate_post_hoc_catheter_trajectory(self,
                                               reference_path: str,
                                               impedance_path: str,
@@ -222,7 +233,11 @@ class PostHocEstimator:
         self.alpha_center = alpha_center
         print("Alpha:" + str(self.alpha_center))
         print("LOADING REFERENCE FROM: " + reference_path)
-        ref = self.normalize_values(self.load_values(reference_path))
+        ref_raw = self.normalize_values(self.load_values(reference_path))
+        ref = [self.predict_impedance_from_diameter(x) for x in ref_raw]
+        kernel_size = 10
+        kernel = np.ones(kernel_size) / kernel_size
+        ref = list(np.convolve(ref, kernel, mode='same'))
 
         print("LOADING IMPEDANCE FROM: " + impedance_path)
         impedance = self.normalize_values(self.load_values(impedance_path))
@@ -244,7 +259,7 @@ class PostHocEstimator:
                                     injector_type=injector_type, alpha_center=alpha_center)
         model.setup_particles(number_of_particles=number_of_particles,
                               initial_position_center=groundtruth[0],
-                              inital_position_variance=initial_position_variance,
+                              initial_position_variance=initial_position_variance,
                               alpha_center=alpha_center,
                               alpha_variance=alpha_variance
                               )

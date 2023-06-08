@@ -1,12 +1,17 @@
+import math
+
 from estimators.post_hoc_estimator import PostHocEstimator
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
+
+
+
 
 if __name__ == "__main__":
 
     estimator = PostHocEstimator()
     # samples = ["20", "25", "27", "29", "30", "31", "34", "35"]  # samples for agar phantom
 
-    # samples = [str(x) for x in range(39, 60)]  # samples for plastic phantom
+    #samples = [str(x) for x in range(39, 60)]  # samples for plastic phantom
     samples = ["44"]
     for sample_nr in samples:
         print("[STARTING TO CALCULATE POST HOC PATH FOR SAMPLE " + sample_nr + "] \n\n")

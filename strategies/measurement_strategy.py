@@ -77,5 +77,6 @@ class MeasurementStrategy:
             if particle.weight != 0:
                 particle.weight = 1 / particle.weight
             else:
-                particle.weight = 10_000
+                particle.weight = 100
+            print(particle.weight)
         return particles
