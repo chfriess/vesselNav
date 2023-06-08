@@ -32,7 +32,8 @@ class MeasurementStrategy:
         if sigma == 0:
             sigma = 1
         for particle in particles:
-            particle.weight = 1 / (self.sigmoid_transform((particle.weight - mu) / sigma))
+            #particle.weight = 1 / (self.sigmoid_transform((particle.weight - mu) / sigma))
+            particle.weight = 1 / self.sigmoid_transform(particle.weight)
         return particles
 
     @staticmethod
@@ -44,6 +45,9 @@ class MeasurementStrategy:
 
     @staticmethod
     def sigmoid_transform(x: float) -> float:
+        return x/(1+abs(x)) + 1
+
+        """
         try:
             acc = 1 + math.e ** (-x)
         except OverflowError:
@@ -53,6 +57,7 @@ class MeasurementStrategy:
         except OverflowError:
             result = 0
         return result
+        """
 
     def normalize_particles(self, particles: ParticleSet) -> ParticleSet:
         normalizer = self.calculate_normalizer(particles)
