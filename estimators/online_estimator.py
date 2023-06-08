@@ -3,7 +3,7 @@ import logging
 import numpy as np
 
 from filter.model import Model
-from utils.cluster_position_estimate import ClusterPositionEstimate
+from utils.position_estimate import ClusterPositionEstimate
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
 
 

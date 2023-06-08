@@ -5,11 +5,10 @@ from utils.particle_set import ParticleSet
 
 class AlphaVariationInjector(InjectionStrategy):
 
-    def __init__(self, map_borders: list,
+    def __init__(self,
                  percentage_of_particles_injected: float = 0.05,
                  alpha_center: float = 1.5,
                  alpha_variance: float = 0.1):
-        super().__init__(map_borders)
         self.percentage_of_particles_injected = percentage_of_particles_injected
         self.alpha_center = alpha_center
         self.alpha_variance = alpha_variance

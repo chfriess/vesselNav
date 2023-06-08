@@ -11,11 +11,11 @@ from measurement_models.ahistoric_measurement_model import AhistoricMeasurementM
 from measurement_models.sliding_dtw_measurement_model import SlidingDTWMeasurementModel
 from motion_models.motion_model import MotionModel
 from resamplers.low_variance_resampler import LowVarianceResampler
-from utils.cluster_position_estimate import ClusterPositionEstimate
+from utils.position_estimate import ClusterPositionEstimate
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
 from particles.particle import Particle
 from utils.particle_set import ParticleSet
-from utils.position_estimate import PositionEstimate
+from utils.position import Position
 from particles.sliding_particle import SlidingParticle
 from particles.state import State
 
@@ -48,7 +48,7 @@ class Model:
                               alpha_center: float
                               ):
         if injector_type == InjectorType.ALPHA_VARIANCE:
-            injection_strategy = AlphaVariationInjector(map_borders=[0, len(reference)], alpha_center=alpha_center)
+            injection_strategy = AlphaVariationInjector(alpha_center=alpha_center)
             logging.info("injector: alpha variance")
         elif injector_type == InjectorType.RANDOM_PARTICLE:
             injection_strategy = RandomParticleInjector(map_borders=[0, len(reference)])
@@ -75,27 +75,26 @@ class Model:
     def setup_particles(self,
                         number_of_particles: int,
                         initial_position_center: float = 0.0,
-                        inital_position_variance: float = 0.0,
+                        initial_position_variance: float = 0.0,
                         alpha_center: float = 2.0,
                         alpha_variance: float = 0.1):
         if self.particle_filter is None:
             raise ValueError("You must setup the particle filter before choosing the number of particles")
         self.particles = ParticleSet()
         logging.info("Number of particles = " + str(number_of_particles))
-        logging.info("initial position =  " + str(initial_position_center) + " +/- " + str(inital_position_variance))
+        logging.info("initial position =  " + str(initial_position_center) + " +/- " + str(initial_position_variance))
         logging.info("alpha = " + str(alpha_center) + " +/- " + str(alpha_variance) + "\n\n")
-
         if isinstance(self.particle_filter.measurement_strategy, AhistoricMeasurementModel):
-            for index in range(number_of_particles):
+            for _ in range(number_of_particles):
                 state = State()
-                state.assign_random_position(center=initial_position_center, variance=inital_position_variance)
+                state.assign_random_position(center=initial_position_center, variance=initial_position_variance)
                 state.assign_random_alpha(center=alpha_center, variance=alpha_variance)
                 particle = Particle(state=state, weight=0)
                 self.particles.append(particle)
         if isinstance(self.particle_filter.measurement_strategy, SlidingDTWMeasurementModel):
-            for index in range(number_of_particles):
+            for _ in range(number_of_particles):
                 state = State()
-                state.assign_random_position(center=initial_position_center, variance=inital_position_variance)
+                state.assign_random_position(center=initial_position_center, variance=initial_position_variance)
                 particle = SlidingParticle(state=state, weight=0)
                 self.particles.append(particle)
 
@@ -156,16 +155,16 @@ class Model:
         first_cluster = None
         second_cluster = None
         if len(od) > 0:
-            first_cluster = PositionEstimate(mean(od[0]), sem(od[0]))
+            first_cluster = Position(mean(od[0]), sem(od[0]))
         if len(od) > 1:
-            second_cluster = PositionEstimate(mean(od[1]), sem(od[1]))
+            second_cluster = Position(mean(od[1]), sem(od[1]))
 
         position_estimate = ClusterPositionEstimate(first_cluster=first_cluster, second_cluster=second_cluster,
                                                     number_of_clusters=no_clusters, number_of_noise=no_noise)
         logging.info("Best Position Estimate mean/sem = " + str(position_estimate) + "\n")
         return position_estimate
 
-    def estimate_current_position_mean(self) -> PositionEstimate:
+    def estimate_current_position_mean(self) -> Position:
         # Resampling step already has taken place, therefore no weighted average is necessary
         position_sum = 0
         weight_sum = 0
@@ -175,9 +174,9 @@ class Model:
             weight_sum += particle.weight
             positions.append(particle.state.position)
         if weight_sum == 0:
-            position_estimate = PositionEstimate(mean(positions), sem(positions))
+            position_estimate = Position(mean(positions), sem(positions))
         else:
-            position_estimate = PositionEstimate(position_sum / weight_sum, sem(positions))
+            position_estimate = Position(position_sum / weight_sum, sem(positions))
         logging.info("Best Position Estimate mean/sem = " + str(position_estimate) + "\n")
         return position_estimate
 

@@ -4,24 +4,21 @@ from utils.particle_filter_component_enums import MeasurementType, InjectorType
 if __name__ == "__main__":
 
     estimator = PostHocEstimator()
-    samples = ["20", "25", "27", "29", "30", "31", "34", "35"]  # samples for agar phantom
+    # samples = ["20", "25", "27", "29", "30", "31", "34", "35"]  # samples for agar phantom
 
     # samples = [str(x) for x in range(39, 60)]  # samples for plastic phantom
+    samples = ["44"]
     for sample_nr in samples:
         print("[STARTING TO CALCULATE POST HOC PATH FOR SAMPLE " + sample_nr + "] \n\n")
-        """
-        PLASTIC PHANTOM PATHS
 
-        ref_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\"+ "reference.npy"
-        imp_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\coregistration_" 
-        + sample_nr + "\\data_bioelectric_sensors"+ "\\impedance_interpolated_" + sample_nr + ".npy"
-        grtruth_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\
-        coregistration_" + sample_nr + "\\data_bioelectric_sensors"+"\\em_interpolated_" + sample_nr + ".npy"
-        displace_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\
-        coregistration_" + sample_nr + "\\data_bioelectric_sensors"+"\\displacements_interpolated_" + sample_nr + ".npy"
+        # PLASTIC PHANTOM PATHS
 
-        dest_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\coregistration_"
-         + sample_nr + "\\results_sample_"+ sample_nr + "\\"
+        ref_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\"+ "reference_for_plastic_from_iliaca.npy"
+        imp_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\coregistration_"  + sample_nr + "\\data_bioelectric_sensors"+ "\\impedance_from_iliaca.npy"
+        grtruth_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\coregistration_" + sample_nr + "\\data_bioelectric_sensors"+"\\groundtruth_shifted_from_iliaca.npy"
+        displace_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\coregistration_" + sample_nr + "\\data_bioelectric_sensors"+"\\displacements_from_iliaca.npy"
+
+        dest_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\coregistration_"+ sample_nr + "\\results_sample_"+ sample_nr + "\\"
         """
         ref_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\" + "reference_from_iliaca.npy"
         imp_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr + "\\data_sample_" \
@@ -32,6 +29,7 @@ if __name__ == "__main__":
                         + "\\data_sample_" + sample_nr + "\\displacements_from_iliaca.npy"
         dest_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
                     + "\\results_sample_" + sample_nr + "\\"
+         """
         file = "phantom_sample_" + sample_nr
 
         estimator.estimate_post_hoc_catheter_trajectory(reference_path=ref_path,
@@ -46,5 +44,5 @@ if __name__ == "__main__":
                                                         alpha_variance=0.1,
                                                         offset_groundtruth_bioelectric=-3,
                                                         measurement_type=MeasurementType.AHISTORIC,
-                                                        injector_type=InjectorType.ALPHA_VARIANCE)
+                                                        injector_type=InjectorType.RANDOM_PARTICLE)
         print("[FINISHED CALCULATING POST HOC PATH FOR SAMPLE " + sample_nr + "] \n\n")
