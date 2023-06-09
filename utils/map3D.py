@@ -1,5 +1,7 @@
 import numbers
 
+import numpy as np
+
 
 class Map3D:
 
@@ -16,8 +18,12 @@ class Map3D:
         else:
             self.mappings = mappings
 
-    def add_vessel_as_dict(self, vessel: dict, index: int):
-        pass
+    def add_vessel_diameters_per_position_in_mm(self, positions: list, diameters: list, index: int):
+        if not positions[0] == 0:
+            raise ValueError("must provide diameter of vessel beginn")
+        x = np.linspace(0, positions[-1], round(positions[-1]))
+        diameters = np.interp(x, positions, diameters)
+        self.add_vessel_as_millimeter_list(vessel=list(diameters), index=index)
 
     def add_vessel_as_millimeter_list(self, vessel: list, index: int):
         if not all(isinstance(x, numbers.Number) for x in vessel):
@@ -58,4 +64,3 @@ class Map3D:
         if not successor_indices:
             raise ValueError("No vessel with index " + str(index) + "found in the map")
         return successor_indices
-
