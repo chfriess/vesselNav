@@ -23,14 +23,14 @@ class SlidingDTWMeasurementModel(MeasurementStrategy):
 
     def raw_weight_particles(self, particles: ParticleSet, measurement: float) -> ParticleSet:
         self.measurement_history.append(measurement)
-        if len(self.measurement_history) > 10:
-            self.measurement_history = self.measurement_history[-10:]
+        if len(self.measurement_history) > 20:
+            self.measurement_history = self.measurement_history[-20:]
 
         for particle in particles:
             particle.reference_history += self.particle_reference_retriever.retrieve_reference_update(
                 particle, self.reference_signal)
-            if len(particle.reference_history) > 10:
-                particle.reference_history = particle.reference_history[-10:]
+            if len(particle.reference_history) > 20:
+                particle.reference_history = particle.reference_history[-20:]
             particle.weight = dtw(self.measurement_history, particle.reference_history)
         return particles
 
@@ -38,25 +38,62 @@ class SlidingDTWMeasurementModel(MeasurementStrategy):
 class SlidingDerivativeDTWMeasurementModel(SlidingDTWMeasurementModel):
 
     @staticmethod
-    def derive_series(series: list) -> list:
+    def smooth_exponentially(data: list,
+                             alpha: float = 0.5) -> list:
+        if len(data) < 1:
+            raise ValueError("list must contain elements")
+        if alpha <= 0 or alpha >= 1:
+            raise ValueError("alpha must be between 0 and 1")
+        fitted_data = [data[0]]
+        for index in range(1, len(data)):
+            next_fit = alpha * data[index] + (1 - alpha) * data[index - 1]
+            fitted_data.append(next_fit)
+        return fitted_data
+
+    def derive_series(self, series: list) -> list:
         if len(series) < 3:
             return series
-        series_np = np.array(series)
+        series_np = np.array(self.smooth_exponentially(series))
         derivative = 0.25 * series_np[2:] + 0.5 * series_np[1:-1] - 0.75 * series_np[:-2]
 
         return list(derivative)
 
     def raw_weight_particles(self, particles: ParticleSet, measurement: float) -> ParticleSet:
         self.measurement_history.append(measurement)
-        if len(self.measurement_history) > 10:
-            self.measurement_history = self.measurement_history[-10:]
+        if len(self.measurement_history) > 20:
+            self.measurement_history = self.measurement_history[-20:]
 
         for particle in particles:
             particle.reference_history += self.particle_reference_retriever.retrieve_reference_update(
                 particle, self.reference_signal)
-            if len(particle.reference_history) > 10:
-                particle.reference_history = particle.reference_history[-10:]
+            if len(particle.reference_history) > 20:
+                particle.reference_history = particle.reference_history[-20:]
             particle.weight = dtw(self.derive_series(self.measurement_history),
                                   self.derive_series(particle.reference_history))
         return particles
 
+
+class SlidingCombinedDerivativeDTWMeasurementModel(SlidingDerivativeDTWMeasurementModel):
+
+    def alpha_derive_series(self, series: list) -> list:
+        alpha = 0.5
+        if len(series) < 3:
+            return series
+        series_np = np.array(series)
+        derivative = self.derive_series(series)
+        combination = alpha * series_np[2:] + (1 - alpha) * np.array(derivative)
+        return list(combination)
+
+    def raw_weight_particles(self, particles: ParticleSet, measurement: float) -> ParticleSet:
+        self.measurement_history.append(measurement)
+        if len(self.measurement_history) > 20:
+            self.measurement_history = self.measurement_history[-20:]
+
+        for particle in particles:
+            particle.reference_history += self.particle_reference_retriever.retrieve_reference_update(
+                particle, self.reference_signal)
+            if len(particle.reference_history) > 20:
+                particle.reference_history = particle.reference_history[-20:]
+            particle.weight = dtw(self.alpha_derive_series(self.measurement_history),
+                                  self.alpha_derive_series(particle.reference_history))
+        return particles

@@ -43,6 +43,14 @@ class Particle3D(Particle):
         super().__init__(state, weight)
 
 
+class AlphaMapParticle(Particle):
+
+    def __init__(self, state: State, len1Dreference):
+        super().__init__(state)
+        self.map = [state.alpha for _ in range(len1Dreference)]
+
+
+
 
 
 

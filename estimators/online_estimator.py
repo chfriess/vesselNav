@@ -2,6 +2,7 @@ import logging
 
 import numpy as np
 
+from estimators import post_hoc_estimator
 from filter.model import Model
 from utils.position_estimate import ClusterPositionEstimate
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
@@ -35,7 +36,7 @@ class OnlineEstimator:
 
     def setup_model(self,
                     reference_path: str,
-                    destination_path: str,
+                    log_destination_path: str,
                     filename: str,
                     measurement_type: MeasurementType = MeasurementType.AHISTORIC,
                     injector_type: InjectorType = InjectorType.ALPHA_VARIANCE,
@@ -46,9 +47,14 @@ class OnlineEstimator:
                     alpha_variance: float = 0.1,
                     ):
         self.model = Model()
-        ref = self.normalize_reference(list(np.load(reference_path)))
+        ref = list(np.load(reference_path))
+        ref_raw = post_hoc_estimator.PostHocEstimator.normalize_values(ref)
+        ref = [post_hoc_estimator.PostHocEstimator.predict_impedance_from_diameter(x) for x in ref_raw]
+        kernel_size = 10
+        kernel = np.ones(kernel_size) / kernel_size
+        ref = list(np.convolve(ref, kernel, mode='same'))
         self.model.setup_logger(loglevel=logging.INFO,
-                                log_directory=destination_path,
+                                log_directory=log_destination_path,
                                 filename=filename + "_log")
         self.model.setup_particle_filter(reference=ref,
                                          measurement_model=measurement_type,
@@ -56,12 +62,11 @@ class OnlineEstimator:
                                          alpha_center=alpha_center)
         self.model.setup_particles(number_of_particles=number_of_particles,
                                    initial_position_center=initial_position_center,
-                                   inital_position_variance=initial_position_variance,
+                                   initial_position_variance=initial_position_variance,
                                    alpha_center=alpha_center,
                                    alpha_variance=alpha_variance
                                    )
 
     def update_step(self, displacement: float, impedance: float) -> ClusterPositionEstimate:
-        normalized_impedance = self.normalize_impedance(impedance)
-        self.model.update_model(displacement=displacement, impedance=normalized_impedance)
+        self.model.update_model(displacement=displacement, impedance=impedance)
         return self.model.estimate_current_position_dbscan()

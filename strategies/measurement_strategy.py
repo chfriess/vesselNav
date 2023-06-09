@@ -30,10 +30,11 @@ class MeasurementStrategy:
             print("Statistics Error occurred")
             print(len(particles))
         if sigma == 0:
+            # When there is no variance, all values are the same; and their difference from the mean is 0;
             sigma = 1
         for particle in particles:
-            #particle.weight = 1 / (self.sigmoid_transform((particle.weight - mu) / sigma))
-            particle.weight = 1 / self.sigmoid_transform(particle.weight)
+            particle.weight = 1 / (self.sigmoid_transform((particle.weight - mu) / sigma))
+            # particle.weight = 1 / self.sigmoid_transform(particle.weight)
         return particles
 
     @staticmethod
@@ -46,6 +47,15 @@ class MeasurementStrategy:
     @staticmethod
     def sigmoid_transform(x: float) -> float:
         return x/(1+abs(x)) + 1
+
+
+        """
+        a = 10
+        b = 3
+        return 1 - math.e ** ((-x / a) ** b)
+
+        """
+
 
         """
         try:
@@ -82,6 +92,6 @@ class MeasurementStrategy:
             if particle.weight != 0:
                 particle.weight = 1 / particle.weight
             else:
-                particle.weight = 100
+                particle.weight = sys.float_info.max
             print(particle.weight)
         return particles
