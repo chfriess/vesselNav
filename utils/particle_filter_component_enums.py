@@ -11,3 +11,8 @@ class InjectorType(Enum):
     ALPHA_VARIANCE = 0
     RANDOM_PARTICLE = 1
 
+
+class MapType(Enum):
+    MAP_1D = 0
+    MAP_3D = 1
+

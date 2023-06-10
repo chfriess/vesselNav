@@ -1,3 +1,5 @@
+import math
+import statistics
 from abc import abstractmethod
 import logging
 from collections import OrderedDict
@@ -23,9 +25,28 @@ class ModelInterface:
     def reset_model(self):
         self.update_steps = 1
 
+    @staticmethod
+    def normalize_values(data: list) -> list:
+        mu = statistics.mean(data)
+        sigma = statistics.stdev(data)
+        for i, el in enumerate(data):
+            data[i] = (el - mu) / sigma
+        return data
+
+    @staticmethod
+    def predict_impedance_from_diameter(diameter):
+        # expects diameter in mm, converts it to m
+        diameter = diameter / 1000
+        circumference = diameter * math.pi
+        csa = ((diameter / 2) ** 2) * math.pi
+        sensor_distance = 3 / 1000
+        tissue_conductivity = 0.30709
+        blood_conductivity = 0.7
+        return 1000 * ((csa * blood_conductivity) / sensor_distance + tissue_conductivity * circumference) ** (-1)
+
     @abstractmethod
     def setup_particle_filter(self,
-                              map3D: Map3D,
+                              map_path: str,
                               measurement_model: MeasurementType,
                               injector_type: InjectorType,
                               alpha_center: float

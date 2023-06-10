@@ -1,6 +1,6 @@
 import csv
 import math
-
+import statistics
 
 import matplotlib
 from matplotlib import pyplot as plt
@@ -21,6 +21,13 @@ class PostHocVesselNavigator(Navigator):
     def __init__(self):
         self.alpha_center = 2
 
+    @staticmethod
+    def normalize_values(data: list) -> list:
+        mu = statistics.mean(data)
+        sigma = statistics.stdev(data)
+        for i, el in enumerate(data):
+            data[i] = (el - mu) / sigma
+        return data
 
 
     @staticmethod
@@ -186,11 +193,6 @@ class PostHocVesselNavigator(Navigator):
         self.alpha_center = alpha_center
         print("Alpha:" + str(self.alpha_center))
         print("LOADING REFERENCE FROM: " + reference_path)
-        ref_raw = self.normalize_values(self.load_values(reference_path))
-        ref = [self.predict_impedance_from_diameter(x) for x in ref_raw]
-        kernel_size = 10
-        kernel = np.ones(kernel_size) / kernel_size
-        ref = list(np.convolve(ref, kernel, mode='same'))
 
         print("LOADING IMPEDANCE FROM: " + impedance_path)
         impedance = self.normalize_values(self.load_values(impedance_path))
@@ -207,7 +209,7 @@ class PostHocVesselNavigator(Navigator):
         model.setup_logger(loglevel=logging.INFO,
                            log_directory=destination_path,
                            filename=filename + "_log")
-        model.setup_particle_filter(reference=ref,
+        model.setup_particle_filter(reference_path=reference_path,
                                     measurement_model=measurement_type,
                                     injector_type=injector_type, alpha_center=alpha_center)
         model.setup_particles(number_of_particles=number_of_particles,

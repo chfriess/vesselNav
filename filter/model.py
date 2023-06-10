@@ -28,12 +28,21 @@ class Model(ModelInterface):
     def __init__(self, particle_filter: ParticleFilter = None, particles: ParticleSet = None) -> None:
         super().__init__(particle_filter, particles)
 
+    def load_reference(self, reference_path: str):
+        ref = list(np.load(reference_path))
+        ref_raw = self.normalize_values(ref)
+        ref = [self.predict_impedance_from_diameter(x) for x in ref_raw]
+        kernel_size = 10
+        kernel = np.ones(kernel_size) / kernel_size
+        return list(np.convolve(ref, kernel, mode='same'))
+
     def setup_particle_filter(self,
-                              reference: list,
+                              map_path: str,
                               measurement_model: MeasurementType,
                               injector_type: InjectorType,
                               alpha_center: float
                               ):
+        reference = self.load_reference(map_path)
         if injector_type == InjectorType.ALPHA_VARIANCE:
             injection_strategy = AlphaVariationInjector(alpha_center=alpha_center)
             logging.info("injector: alpha variance")
@@ -42,7 +51,6 @@ class Model(ModelInterface):
             logging.info("injector: random particle")
         else:
             raise ValueError("Select a valid injection strategy: alpha variance or random particle")
-
         if measurement_model == MeasurementType.AHISTORIC:
             measurement_strategy = AhistoricMeasurementModel(reference_signal=reference)
             logging.info("measurement model: ahistoric")

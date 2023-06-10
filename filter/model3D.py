@@ -18,10 +18,11 @@ import logging
 
 
 class Model3D(ModelInterface):
-    def setup_particle_filter(self, map3D: Map3D,
+    def setup_particle_filter(self, map_path: str,
                               measurement_model: MeasurementType,
                               injector_type: InjectorType,
                               alpha_center: float):
+        map3D = self.load_map_3D(map_path)
         if injector_type == InjectorType.ALPHA_VARIANCE:
             injection_strategy = AlphaVariationInjector(alpha_center=alpha_center)
             logging.info("injector: alpha variance")
@@ -81,3 +82,6 @@ class Model3D(ModelInterface):
                                                          number_of_particles=len(cluster),
                                                          branch=key))
         return position_estimate
+
+    def load_map_3D(self, map3D_path) -> Map3D:
+        pass

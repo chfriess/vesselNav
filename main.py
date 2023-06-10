@@ -37,16 +37,16 @@ def evaluate_performance():
     performance = {}
     errors = {}
     for n in range(100, 1100, 100):
-        navigator.setup_model(reference_path=ref_path,
-                              log_destination_path=dest_path,
-                              filename=file,
-                              number_of_particles=1000,
-                              initial_position_variance=0.1,
-                              alpha_center=2,
-                              alpha_variance=0.1,
-                              measurement_type=MeasurementType.AHISTORIC,
-                              injector_type=InjectorType.RANDOM_PARTICLE
-                              )
+        navigator.setup_navigator(reference_path=ref_path,
+                                  log_destination_path=dest_path,
+                                  filename=file,
+                                  number_of_particles=1000,
+                                  initial_position_variance=0.1,
+                                  alpha_center=2,
+                                  alpha_variance=0.1,
+                                  measurement_type=MeasurementType.AHISTORIC,
+                                  injector_type=InjectorType.RANDOM_PARTICLE
+                                  )
         acc = 0
         clusters = []
         for i in range(len(displacements)):
