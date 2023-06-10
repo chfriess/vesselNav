@@ -1,14 +1,12 @@
 import logging
-
 import numpy as np
-
-from estimators import post_hoc_estimator
 from filter.model import Model
+from navigators.navigator_interface import Navigator
 from utils.position_estimate import ClusterPositionEstimate
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
 
 
-class OnlineEstimator:
+class VesselNavigator(Navigator):
 
     def __init__(self, model: Model = None):
         self.model = model
@@ -48,8 +46,8 @@ class OnlineEstimator:
                     ):
         self.model = Model()
         ref = list(np.load(reference_path))
-        ref_raw = post_hoc_estimator.PostHocEstimator.normalize_values(ref)
-        ref = [post_hoc_estimator.PostHocEstimator.predict_impedance_from_diameter(x) for x in ref_raw]
+        ref_raw = self.normalize_values(ref)
+        ref = [self.predict_impedance_from_diameter(x) for x in ref_raw]
         kernel_size = 10
         kernel = np.ones(kernel_size) / kernel_size
         ref = list(np.convolve(ref, kernel, mode='same'))
@@ -70,3 +68,5 @@ class OnlineEstimator:
     def update_step(self, displacement: float, impedance: float) -> ClusterPositionEstimate:
         self.model.update_model(displacement=displacement, impedance=impedance)
         return self.model.estimate_current_position_dbscan()
+
+

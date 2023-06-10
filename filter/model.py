@@ -22,14 +22,6 @@ from particles.state import State
 
 
 class Model:
-    """
-    os.chdir("C:\\Users\\Chris\\OneDrive\\Desktop\\")
-    logging.basicConfig(
-        filename='particleFilterLog.log',
-        format='%(asctime)s %(levelname)-8s %(message)s',
-        level=logging.INFO,
-        datefmt='%Y-%m-%d %H:%M:%S')
-    """
 
     def __init__(self, particle_filter: ParticleFilter = None,
                  particles: ParticleSet = None) -> None:
