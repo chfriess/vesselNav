@@ -9,7 +9,6 @@ from estimators.post_hoc_estimator import PostHocEstimator
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
 
 
-
 def rms(signal: list, groundtruth: list) -> float:
     if len(signal) != len(groundtruth):
         raise ValueError("signal and groundtruth must be of same length for rms calculation")
@@ -18,8 +17,8 @@ def rms(signal: list, groundtruth: list) -> float:
         acc += math.pow((signal[i] - groundtruth[i]), 2)
     return math.sqrt(acc / len(groundtruth))
 
-def evaluate_performance():
 
+def evaluate_performance():
     samples = ["44"]
     sample_nr = "44"
     ref_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\" + "reference_for_plastic_from_iliaca.npy"
@@ -54,16 +53,16 @@ def evaluate_performance():
             start = time.time()
             clusters.append(estimator.update_step(displacement=displacements[i], impedance=impedance[i]))
             end = time.time()
-            acc = end-start
+            acc = end - start
         estimates = [x.get_first_cluster_mean() for x in clusters]
-        performance[n] = acc/len(displacements)
+        performance[n] = acc / len(displacements)
         errors[n] = rms(estimates, list(groundtruth[1:]))
 
     plt.plot(errors.keys(), errors.values())
     plt.figure(1)
     plt.plot(performance.keys(), performance.values())
-    #np.savez("errors per particle number", errors)
-    #np.savez("performance per particle number", performance)
+    # np.savez("errors per particle number", errors)
+    # np.savez("performance per particle number", performance)
 
 
 def calculate_post_hoc_accuracy():

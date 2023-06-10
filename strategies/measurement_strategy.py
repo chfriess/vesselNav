@@ -9,7 +9,7 @@ class MeasurementStrategy:
 
     def weight_particles(self, particles: ParticleSet, measurement: float):
         particles = self.raw_weight_particles(particles=particles, measurement=measurement)
-        particles = self.z_and_sigmoid_transform_particles(particles=particles)
+        particles = self.invert_raw_weights(particles=particles)
         particles = self.normalize_particles(particles=particles)
         return particles
 
@@ -48,27 +48,6 @@ class MeasurementStrategy:
     def sigmoid_transform(x: float) -> float:
         return x/(1+abs(x)) + 1
 
-
-        """
-        a = 10
-        b = 3
-        return 1 - math.e ** ((-x / a) ** b)
-
-        """
-
-
-        """
-        try:
-            acc = 1 + math.e ** (-x)
-        except OverflowError:
-            acc = 1
-        try:
-            result = 1 / acc
-        except OverflowError:
-            result = 0
-        return result
-        """
-
     def normalize_particles(self, particles: ParticleSet) -> ParticleSet:
         normalizer = self.calculate_normalizer(particles)
         if normalizer == 0:
@@ -93,5 +72,4 @@ class MeasurementStrategy:
                 particle.weight = 1 / particle.weight
             else:
                 particle.weight = sys.float_info.max
-            print(particle.weight)
         return particles
