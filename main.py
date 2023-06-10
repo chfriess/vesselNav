@@ -4,8 +4,8 @@ import time
 import numpy as np
 from matplotlib import pyplot as plt
 
-from estimators.vessel_navigator import OnlineEstimator
-from estimators.post_hoc_estimator import PostHocEstimator
+from navigators.post_hoc_vessel_navigator import PostHocVesselNavigator
+from navigators.vessel_navigator import VesselNavigator
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
 
 
@@ -32,12 +32,12 @@ def evaluate_performance():
 
     dest_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\"
     file = "phantom_sample_" + sample_nr
-    estimator = OnlineEstimator()
+    navigator = VesselNavigator()
 
     performance = {}
     errors = {}
     for n in range(100, 1100, 100):
-        estimator.setup_model(reference_path=ref_path,
+        navigator.setup_model(reference_path=ref_path,
                               log_destination_path=dest_path,
                               filename=file,
                               number_of_particles=1000,
@@ -51,7 +51,7 @@ def evaluate_performance():
         clusters = []
         for i in range(len(displacements)):
             start = time.time()
-            clusters.append(estimator.update_step(displacement=displacements[i], impedance=impedance[i]))
+            clusters.append(navigator.update_step(displacement=displacements[i], impedance=impedance[i]))
             end = time.time()
             acc = end - start
         estimates = [x.get_first_cluster_mean() for x in clusters]
@@ -66,7 +66,7 @@ def evaluate_performance():
 
 
 def calculate_post_hoc_accuracy():
-    estimator = PostHocEstimator()
+    estimator = PostHocVesselNavigator()
     # samples = ["20", "25", "27", "29", "30", "31", "34", "35"]  # samples for agar phantom
 
     # samples = [str(x) for x in range(39, 60)]  # samples for plastic phantom

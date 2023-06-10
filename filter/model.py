@@ -12,7 +12,7 @@ from measurement_models.sliding_dtw_measurement_model import SlidingDTWMeasureme
     SlidingDerivativeDTWMeasurementModel
 from motion_models.motion_model import MotionModel
 from resamplers.low_variance_resampler import LowVarianceResampler
-from utils.position_estimate import ClusterPositionEstimate
+from utils.position_estimate import ClusterPositionEstimate, PositionEstimate
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
 from particles.particle import Particle
 from utils.particle_set import ParticleSet
@@ -130,7 +130,7 @@ class Model:
         key, values = d
         return len(values)
 
-    def estimate_current_position_dbscan(self) -> ClusterPositionEstimate:
+    def estimate_current_position(self) -> PositionEstimate:
         positions = [particle.state.position for particle in self.particles]
         reshaped_positions = np.reshape(positions, (-1, 1))
         clustering1 = DBSCAN(eps=3, min_samples=2).fit(reshaped_positions)

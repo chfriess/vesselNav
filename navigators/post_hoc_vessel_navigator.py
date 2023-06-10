@@ -103,7 +103,7 @@ class PostHocVesselNavigator(Navigator):
         alpha_estimates = []
         cumulative_displacements = []
         length = len(displacements) if len(displacements) < len(impedance) else len(impedance)
-        position_estimates.append(model.estimate_current_position_dbscan())
+        position_estimates.append(model.estimate_current_position())
         cumulative_displacements.append(groundtruth[0])
         print("START POST HOC ESTIMATION \n")
         devations_from_groundtruth = []
@@ -129,7 +129,7 @@ class PostHocVesselNavigator(Navigator):
                 model.update_model(displacement=displacements[i],
                                    impedance=impedance[i])
                 end = time.time()
-                position_estimate = model.estimate_current_position_dbscan()
+                position_estimate = model.estimate_current_position()
                 position_estimates.append(position_estimate)
                 alpha_estimates.append(model.get_current_average_alpha())
                 print("Best position estimate cluster: " + str(position_estimates[i]))

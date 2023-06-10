@@ -67,6 +67,6 @@ class VesselNavigator(Navigator):
 
     def update_step(self, displacement: float, impedance: float) -> ClusterPositionEstimate:
         self.model.update_model(displacement=displacement, impedance=impedance)
-        return self.model.estimate_current_position_dbscan()
+        return self.model.estimate_current_position()
 
 

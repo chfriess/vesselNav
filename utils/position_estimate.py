@@ -5,11 +5,31 @@ from utils.position import Position, Position3D
 
 class PositionEstimate:
     @abstractmethod
-    def get_best_estimate(self):
+    def get_clusters(self):
         raise NotImplementedError
 
     @abstractmethod
-    def get_error_of_best_estimate(self):
+    def get_first_cluster(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_second_cluster(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_first_cluster_mean(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_first_cluster_error(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_second_cluster_mean(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_second_cluster_error(self):
         raise NotImplementedError
 
 
@@ -30,8 +50,14 @@ class ClusterPositionEstimate(PositionEstimate):
                f'number of clusters: {str(self.number_of_clusters)} |' \
                f' number of noise points: {str(self.number_of_noise)}   ]'
 
+    def get_clusters(self):
+        return [self.first_cluster, self.second_cluster]
+
     def get_first_cluster(self):
         return self.first_cluster
+
+    def get_second_cluster(self):
+        return self.second_cluster
 
     def get_first_cluster_mean(self):
         if self.first_cluster is not None:
@@ -44,9 +70,6 @@ class ClusterPositionEstimate(PositionEstimate):
             return self.first_cluster.error
         else:
             return "__"
-
-    def get_second_cluster(self):
-        return self.second_cluster
 
     def get_second_cluster_mean(self):
         if self.second_cluster is not None:
@@ -65,12 +88,6 @@ class ClusterPositionEstimate(PositionEstimate):
 
     def get_number_of_noise(self):
         return self.number_of_noise
-
-    def get_best_estimate(self):
-        return self.get_first_cluster_mean()
-
-    def get_error_of_best_estimate(self):
-        return self.get_first_cluster_error()
 
 
 class ClusterPositionEstimate3D(PositionEstimate):
@@ -93,17 +110,32 @@ class ClusterPositionEstimate3D(PositionEstimate):
     def get_clusters(self):
         return self.clusters
 
-    def get_best_cluster(self):
+    def get_first_cluster(self):
         if len(self.clusters) == 0:
             return None
-        best_cluster = self.clusters[0]
-        for cluster in self.clusters:
-            if cluster.get_number_of_particles > best_cluster.get_number_of_particles():
-                best_cluster = cluster
+        best_cluster = None
+        best_cluster_size = 0
+        for branch in self.clusters.keys():
+            for cluster in self.clusters[branch]:
+                if cluster.get_number_of_particles() > best_cluster_size:
+                    best_cluster = cluster
+                    best_cluster_size = cluster.get_number_of_particles()
         return best_cluster
 
-    def get_best_estimate(self):
-        return self.get_best_cluster().get_center(), self.get_best_cluster().get_branch()
+    def get_second_cluster(self):
+        # TODO implement fast version to do this
+        pass
 
-    def get_error_of_best_estimate(self):
-        return self.get_best_cluster().get_error()
+    def get_first_cluster_mean(self):
+        return self.get_first_cluster().get_center(), self.get_first_cluster().get_branch()
+
+    def get_first_cluster_error(self):
+        return self.get_first_cluster().get_error()
+
+    def get_second_cluster_mean(self):
+        # TODO implement fast version to do this
+        pass
+
+    def get_second_cluster_error(self):
+        # TODO implement fast version to do this
+        pass
