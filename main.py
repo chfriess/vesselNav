@@ -4,7 +4,7 @@ import time
 import numpy as np
 from matplotlib import pyplot as plt
 
-from estimators.online_estimator import OnlineEstimator
+from estimators.vessel_navigator import OnlineEstimator
 from estimators.post_hoc_estimator import PostHocEstimator
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
 
