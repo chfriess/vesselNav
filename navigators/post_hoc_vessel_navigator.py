@@ -209,7 +209,7 @@ class PostHocVesselNavigator(Navigator):
         model.setup_logger(loglevel=logging.INFO,
                            log_directory=destination_path,
                            filename=filename + "_log")
-        model.setup_particle_filter(reference_path=reference_path,
+        model.setup_particle_filter(map_path=reference_path,
                                     measurement_model=measurement_type,
                                     injector_type=injector_type, alpha_center=alpha_center)
         model.setup_particles(number_of_particles=number_of_particles,

@@ -1,5 +1,8 @@
+import random
+
+from particles.state import State3D
 from strategies.measurement_strategy import MeasurementStrategy
-from particles.particle import Particle
+from particles.particle import Particle, Particle3D
 from utils.map3D import Map3D
 from utils.particle_set import ParticleSet
 
@@ -40,15 +43,17 @@ class AhistoricMeasurementModel3D(MeasurementStrategy):
         return self.map3D
 
     def retrieve_signal_prediction(self, particle: Particle) -> float:
-        position = round(particle.get_state().get_position())
+        position = round(particle.get_state().get_position()["displacement"])
+
         if position < 0:
-            return self.map3D.get_vessel(particle.get_state().get_branch())[0]
-        elif position > len(self.map3D.get_vessel(particle.get_state().get_branch())) - 1:
-            return self.map3D.get_vessel(particle.get_state().get_branch())[-1]
+            return self.map3D.get_vessel(particle.get_state().get_position()["branch"])[0]
+        elif position > len(self.map3D.get_vessel(particle.get_state().get_position()["branch"])) - 1:
+            return self.map3D.get_vessel(particle.get_state().get_position()["branch"])[-1]
         else:
-            return self.map3D.get_vessel(particle.get_state().get_branch())[position]
+            return self.map3D.get_vessel(particle.get_state().get_position()["branch"])[position]
 
     def raw_weight_particles(self, particles: ParticleSet, measurement: float) -> ParticleSet:
         for particle in particles:
             particle.weight = abs(measurement - self.retrieve_signal_prediction(particle=particle))
         return particles
+

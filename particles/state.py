@@ -46,7 +46,7 @@ class State3D(State):
         self.branch = branch
 
     def __str__(self):
-        return f'[Position: {self.position} | Branch: {self.position} | Alpha: {self.alpha}]'
+        return f'[Position: {self.position} | Branch: {self.branch} | Alpha: {self.alpha}]'
 
     def get_position(self):
 

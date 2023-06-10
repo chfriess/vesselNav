@@ -18,14 +18,14 @@ class Map3D:
         else:
             self.mappings = mappings
 
-    def add_vessel_diameters_per_position_in_mm(self, positions: list, diameters: list, index: int):
+    def add_vessel_impedance_prediction_per_position_in_mm(self, positions: list, diameters: list, index: int):
         if not positions[0] == 0:
             raise ValueError("must provide diameter of vessel beginn")
         x = np.linspace(0, positions[-1], round(positions[-1]))
         diameters = np.interp(x, positions, diameters)
-        self.add_vessel_as_millimeter_list(vessel=list(diameters), index=index)
+        self.add_vessel_impedance_prediction_as_millimeter_list(vessel=list(diameters), index=index)
 
-    def add_vessel_as_millimeter_list(self, vessel: list, index: int):
+    def add_vessel_impedance_prediction_as_millimeter_list(self, vessel: list, index: int):
         if not all(isinstance(x, numbers.Number) for x in vessel):
             raise ValueError("The diameters of a vessel can only contain numeric values")
         if index in self.vessels.keys():
@@ -33,12 +33,10 @@ class Map3D:
         self.vessels[index] = vessel
 
     def add_mapping(self, mapping: list):
-        if not all(isinstance(x, tuple) for x in mapping):
-            raise ValueError("The mapping must consist of tuples containing 2 integer values")
-        if not all(len(x) == 2 for x in mapping):
-            raise ValueError("The mapping must consist of tuples containing 2 integer values")
-        if not all(isinstance(x, int) and isinstance(y, int) for (x, y) in mapping):
-            raise ValueError("The mapping must consist of tuples containing 2 integer values")
+        if not all(isinstance(x, int) for x in mapping):
+            raise ValueError("The mapping must consist of integer values")
+        if not len(mapping) == 2:
+            raise ValueError("The mapping must consist of 2 integer values")
         self.mappings.append(mapping)
 
     def get_vessels(self):
@@ -54,7 +52,7 @@ class Map3D:
         for mapping in self.mappings:
             if mapping[1] == index:
                 return mapping[0]
-        raise ValueError("No vessel with index " + str(index) + "found in the map")
+        return -1
 
     def get_indices_of_successors(self, index: int) -> list:
         successor_indices = []
@@ -62,5 +60,6 @@ class Map3D:
             if mapping[0] == index:
                 successor_indices.append(mapping[1])
         if not successor_indices:
-            raise ValueError("No vessel with index " + str(index) + "found in the map")
+            return []
         return successor_indices
+

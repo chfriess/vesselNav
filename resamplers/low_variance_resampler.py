@@ -1,6 +1,8 @@
 import copy
 import random
 
+from particles.particle import Particle3D, Particle
+from particles.state import State3D, State
 from strategies.resampling_strategy import ResamplingStrategy
 from utils.particle_set import ParticleSet
 
@@ -27,10 +29,11 @@ class LowVarianceResampler(ResamplingStrategy):
                 i += 1
                 if i > len(cumulative_weights)-1:
                     if len(resampled_particle_set) < len(weighted_particle_set):
-                        resampled_particle_set.append(weighted_particle_set[0])
+                        resampled_particle_set.append(particle=copy.deepcopy(weighted_particle_set[0]))
                         return resampled_particle_set
                     else:
                         return resampled_particle_set
             resampled_particle_set.append(particle=copy.deepcopy(weighted_particle_set[i]))
 
         return resampled_particle_set
+

@@ -7,7 +7,6 @@ from statistics import mean
 import numpy as np
 from sklearn.cluster import DBSCAN
 from filter.particle_filter import ParticleFilter
-from utils.map3D import Map3D
 from utils.position_estimate import PositionEstimate
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
 from utils.particle_set import ParticleSet

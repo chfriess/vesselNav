@@ -11,6 +11,7 @@ class MeasurementStrategy:
         particles = self.normalize_particles(particles=particles)
         return particles
 
+
     @abstractmethod
     def raw_weight_particles(self, particles: ParticleSet, measurement: float) -> ParticleSet:
         raise NotImplementedError
@@ -39,8 +40,8 @@ class MeasurementStrategy:
     @staticmethod
     def invert_raw_weights(particles: ParticleSet) -> ParticleSet:
         for particle in particles:
-            if particle.weight != 0:
+            if particle.weight > 0.0001:
                 particle.weight = 1 / particle.weight
             else:
-                particle.weight = sys.float_info.max
+                particle.weight = 10_000
         return particles

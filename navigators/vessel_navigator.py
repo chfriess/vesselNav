@@ -1,8 +1,15 @@
 import logging
+
 import numpy as np
+from matplotlib import pyplot as plt
+
 from filter.model import Model
 from filter.model3D import Model3D
 from navigators.navigator_interface import Navigator
+from particles.particle import Particle3D
+from particles.state import State3D
+from utils.map3D import Map3D
+from utils.particle_set import ParticleSet
 from utils.position_estimate import PositionEstimate
 from utils.particle_filter_component_enums import MeasurementType, InjectorType, MapType
 
@@ -49,7 +56,7 @@ class VesselNavigator(Navigator):
                         ):
         if map_type == MapType.MAP_1D:
             self.model = Model()
-            self.model.setup_particle_filter(reference_path=reference_path,
+            self.model.setup_particle_filter(map_path=reference_path,
                                              measurement_model=measurement_type,
                                              injector_type=injector_type,
                                              alpha_center=alpha_center)
@@ -62,7 +69,7 @@ class VesselNavigator(Navigator):
 
         else:
             self.model = Model3D()
-            self.model.setup_particle_filter(map3D_path=reference_path,
+            self.model.setup_particle_filter(map_path=reference_path,
                                              measurement_model=measurement_type,
                                              injector_type=injector_type,
                                              alpha_center=alpha_center)
@@ -70,15 +77,63 @@ class VesselNavigator(Navigator):
                                        initial_position_center=initial_position_center,
                                        initial_position_variance=initial_position_variance,
                                        alpha_center=alpha_center,
-                                       alpha_variance=alpha_variance
+                                       alpha_variance=alpha_variance,
+                                       initial_branch=initial_branch
                                        )
         self.model.setup_logger(loglevel=logging.INFO,
                                 log_directory=log_destination_path,
                                 filename=filename + "_log")
 
+    def get_current_particle_set(self):
+        return self.model.get_particles()
 
     def update_step(self, displacement: float, impedance: float) -> PositionEstimate:
         self.model.update_model(displacement=displacement, impedance=impedance)
         return self.model.estimate_current_position()
 
+
+if __name__ == "__main__":
+    sample_nr = "30"
+    ref_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\" + "reference_from_iliaca.npy"
+    imp_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr + "\\data_sample_" \
+               + sample_nr + "\\impedance_interpolated_" + sample_nr + ".npy"
+    displace_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
+                    + "\\data_sample_" + sample_nr + "\\displacements_interpolated_" + sample_nr + ".npy"
+    dest_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\"
+
+    file = "phantom_sample_" + sample_nr
+
+
+
+    particles = ParticleSet()
+
+    for _ in range(1000):
+        particles.append(Particle3D(State3D(position=0, branch=0, alpha=2)))
+
+    navigator = VesselNavigator()
+    navigator.setup_navigator(reference_path="",
+                              log_destination_path=dest_path,
+                              filename=file,
+                              map_type=MapType.MAP_3D,
+                              alpha_center=2
+                              )
+
+    impedance = np.load(imp_path)/100000
+    displacements = np.load(displace_path)
+
+    estimate = navigator.update_step(displacement=displacements[0], impedance=impedance[0])
+
+
+"""
+     
+        1. Test, ob 3D model überhaupt funktioniert
+         - generiere referenz 3D map, die einlesbar ist als map aus np datei
+         - teste erst einmal einen update step, ob der überhaupt funktioniert; einfach mal immer position und branch
+         printen, dann mal einen ganzen run
+        
+        2. Visualisierung
+         - wie kann ich die partikel für jeden schritt so speicher, dass sie im visualisierungsskript geladen werden
+         können?
+         - wie soll ich die partikel dann für jeden updateschritt darstellen? kleiner film?
+        """
 

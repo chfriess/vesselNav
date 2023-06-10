@@ -1,4 +1,7 @@
 from numpy import random
+
+from particles.particle import Particle3D
+from particles.state import State3D
 from strategies.motion_strategy import MotionStrategy
 from utils.map3D import Map3D
 from utils.particle_set import ParticleSet
@@ -41,23 +44,32 @@ class MotionModel3D(MotionStrategy):
 
         self.displacement_history.append(displacement_measurement)
         error = self.calculate_displacement_error(self.displacement_history)
-
         for particle in previous_particle_set:
-            position_estimate = particle.get_position()["position"] + (displacement_measurement * particle.state.alpha)
+            position_estimate = particle.get_position()["displacement"] + (displacement_measurement * particle.state.alpha)
             if 0 < position_estimate < len(self.map3D.get_vessel(particle.get_position()["branch"])):
                 particle.state.set_position(random.normal(loc=position_estimate, scale=error))
             elif position_estimate < 0:
-                predecessor_index = self.map3D.get_index_of_predecessor(particle.get_position()["position"])
-                predecessor = self.map3D.get_vessel(predecessor_index)
-                position_estimate = len(predecessor) - 1 + position_estimate
-                particle.state.set_position(random.normal(loc=position_estimate, scale=error))
-                particle.state.set_branch(predecessor_index)
+                predecessor_index = self.map3D.get_index_of_predecessor(particle.get_position()["branch"])
+
+                if predecessor_index is not -1:
+                    predecessor = self.map3D.get_vessel(predecessor_index)
+                    position_estimate = len(predecessor) - 1 + position_estimate
+                    particle.state.set_position(random.normal(loc=position_estimate, scale=error))
+                    particle.state.set_branch(predecessor_index)
+                else:
+                    particle.state.set_position(0)
             else:
-                successor_indices = self.map3D.get_indices_of_successors(particle.get_position()["position"])
-                successor_index = random.choice(successor_indices)
-                particle.state.set_position(random.normal(
-                    loc=position_estimate - len(self.map3D.get_vessel(
-                        particle.get_position()["position"])), scale=error))
-                particle.state.set_branch(successor_index)
+                successor_indices = self.map3D.get_indices_of_successors(particle.get_position()["branch"])
+                if not successor_indices == []:
+                    successor_index = random.choice(successor_indices)
+                    particle.state.set_position(random.normal(
+                        loc=position_estimate - len(self.map3D.get_vessel(
+                            particle.get_position()["branch"])), scale=error))
+                    particle.state.set_branch(successor_index)
+                else:
+                    particle.state.set_position(random.normal(
+                        loc=len(self.map3D.get_vessel(particle.get_position()["branch"])), scale=error))
 
         return previous_particle_set
+
+
