@@ -1,5 +1,3 @@
-import math
-import statistics
 import sys
 from abc import abstractmethod
 from utils.particle_set import ParticleSet
@@ -20,33 +18,6 @@ class MeasurementStrategy:
     @abstractmethod
     def get_reference(self):
         raise NotImplementedError
-
-    def z_and_sigmoid_transform_particles(self, particles: ParticleSet) -> ParticleSet:
-        mu = 0
-        sigma = 0
-        try:
-            mu, sigma = self.determine_weight_mean_and_variance(particles)
-        except statistics.StatisticsError:
-            print("Statistics Error occurred")
-            print(len(particles))
-        if sigma == 0:
-            # When there is no variance, all values are the same; and their difference from the mean is 0;
-            sigma = 1
-        for particle in particles:
-            particle.weight = 1 / (self.sigmoid_transform((particle.weight - mu) / sigma))
-            # particle.weight = 1 / self.sigmoid_transform(particle.weight)
-        return particles
-
-    @staticmethod
-    def determine_weight_mean_and_variance(particles: ParticleSet) -> (float, float):
-        weight_list = []
-        for particle in particles:
-            weight_list.append(particle.weight)
-        return statistics.mean(weight_list), statistics.stdev(weight_list)
-
-    @staticmethod
-    def sigmoid_transform(x: float) -> float:
-        return x/(1+abs(x)) + 1
 
     def normalize_particles(self, particles: ParticleSet) -> ParticleSet:
         normalizer = self.calculate_normalizer(particles)

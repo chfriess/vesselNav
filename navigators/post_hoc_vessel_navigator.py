@@ -143,8 +143,8 @@ class PostHocVesselNavigator(Navigator):
                                  str(position_estimate.get_first_cluster_error()),
                                  str(position_estimate.get_second_cluster_mean()),
                                  str(position_estimate.get_second_cluster_error()),
-                                 str(position_estimate.number_of_clusters),
-                                 str(position_estimate.number_of_noise),
+                                 str(position_estimate.get_number_of_clusters()),
+                                 str(position_estimate.get_number_of_noise()),
                                  str(end - start)])
 
         self.save_figures_with_metadata(pfestimates=position_estimates,

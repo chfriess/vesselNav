@@ -4,6 +4,8 @@ import logging
 from scipy.stats import sem
 from statistics import mean
 from sklearn.cluster import DBSCAN
+
+from filter.model_interface import ModelInterface
 from filter.particle_filter import ParticleFilter
 from injectors.alpha_variance_injector import AlphaVariationInjector
 from injectors.random_particle_injector import RandomParticleInjector
@@ -21,18 +23,10 @@ from particles.sliding_particle import SlidingParticle
 from particles.state import State
 
 
-class Model:
+class Model(ModelInterface):
 
-    def __init__(self, particle_filter: ParticleFilter = None,
-                 particles: ParticleSet = None) -> None:
-
-        self.particle_filter = particle_filter
-        self.particles = particles
-
-        self.update_steps = 1
-
-    def reset_model(self):
-        self.update_steps = 1
+    def __init__(self, particle_filter: ParticleFilter = None, particles: ParticleSet = None) -> None:
+        super().__init__(particle_filter, particles)
 
     def setup_particle_filter(self,
                               reference: list,
@@ -73,7 +67,8 @@ class Model:
                         initial_position_center: float = 0.0,
                         initial_position_variance: float = 0.0,
                         alpha_center: float = 2.0,
-                        alpha_variance: float = 0.1):
+                        alpha_variance: float = 0.1,
+                        initial_branch: int = 0):
         if self.particle_filter is None:
             raise ValueError("You must setup the particle filter before choosing the number of particles")
         self.particles = ParticleSet()
@@ -181,5 +176,3 @@ class Model:
         for particle in self.particles:
             alphas.append(particle.state.alpha)
         return mean(alphas)
-
-

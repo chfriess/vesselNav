@@ -32,6 +32,14 @@ class PositionEstimate:
     def get_second_cluster_error(self):
         raise NotImplementedError
 
+    @abstractmethod
+    def get_number_of_clusters(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_number_of_noise(self):
+        raise NotImplementedError
+
 
 class ClusterPositionEstimate(PositionEstimate):
 
@@ -83,7 +91,7 @@ class ClusterPositionEstimate(PositionEstimate):
         else:
             return "__"
 
-    def get_number_of_cluster(self):
+    def get_number_of_clusters(self):
         return self.number_of_clusters
 
     def get_number_of_noise(self):
@@ -137,5 +145,13 @@ class ClusterPositionEstimate3D(PositionEstimate):
         pass
 
     def get_second_cluster_error(self):
+        # TODO implement fast version to do this
+        pass
+
+    def get_number_of_clusters(self):
+        # TODO implement fast version to do this
+        pass
+
+    def get_number_of_noise(self):
         # TODO implement fast version to do this
         pass
