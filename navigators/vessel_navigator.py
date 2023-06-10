@@ -121,7 +121,9 @@ if __name__ == "__main__":
     impedance = np.load(imp_path)/100000
     displacements = np.load(displace_path)
 
-    estimate = navigator.update_step(displacement=displacements[0], impedance=impedance[0])
+    for i in range(len(impedance)):
+        estimate = navigator.update_step(displacement=displacements[i], impedance=impedance[i])
+        print(estimate.get_first_cluster_mean())
 
 
 """

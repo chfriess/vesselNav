@@ -94,12 +94,12 @@ class Model3D(ModelInterface):
                 particles_per_branch[branch] = [particle.get_position()["displacement"]]
             else:
                 particles_per_branch[branch].append(particle.get_position()["displacement"])
-
         for key in particles_per_branch.keys():
-            for cluster in self.calculate_clusters_in_particle_set(particles_per_branch[key]):
-                position_estimate.add_cluster(Position3D(center=mean(cluster),
-                                                         error=sem(cluster),
-                                                         number_of_particles=len(cluster),
+            clusters = self.calculate_clusters_in_particle_set(particles_per_branch[key])
+            for i, _ in enumerate(clusters):
+                position_estimate.add_cluster(Position3D(center=mean(clusters[i]),
+                                                         error=sem(clusters[i]),
+                                                         number_of_particles=len(clusters[i]),
                                                          branch=key))
         return position_estimate
 
