@@ -24,6 +24,7 @@ class Model3D(ModelInterface):
                               alpha_center: float):
         #map3D = self.load_map_3D(map_path)
         map3D = Map3D()
+        #map3D.load_map(map_path)
         aorta_before = [1 / 20 for _ in range(70)]
         aorta_after = [1 / 20 for _ in range(130)]
         renal_left = [1 / 15 for _ in range(100)]
@@ -102,6 +103,3 @@ class Model3D(ModelInterface):
                                                          number_of_particles=len(clusters[i]),
                                                          branch=key))
         return position_estimate
-
-    def load_map_3D(self, map3D_path) -> Map3D:
-        pass

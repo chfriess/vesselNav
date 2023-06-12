@@ -18,6 +18,20 @@ def rms(signal: list, groundtruth: list) -> float:
     return math.sqrt(acc / len(groundtruth))
 
 
+def posthoc_run_3D_vessel_navigator():
+    # load centerline reference map from file
+
+    # load impedance, displacement, and groundtruth
+
+    # save positions and particles per step
+
+    # save all clusters
+
+
+
+    pass
+
+
 def evaluate_performance():
     samples = ["44"]
     sample_nr = "44"
