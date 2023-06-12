@@ -1,12 +1,11 @@
+import json
 import math
 import time
-
 import numpy as np
 from matplotlib import pyplot as plt
-
 from navigators.post_hoc_vessel_navigator import PostHocVesselNavigator
 from navigators.vessel_navigator import VesselNavigator
-from utils.particle_filter_component_enums import MeasurementType, InjectorType
+from utils.particle_filter_component_enums import MeasurementType, InjectorType, MapType
 
 
 def rms(signal: list, groundtruth: list) -> float:
@@ -18,18 +17,52 @@ def rms(signal: list, groundtruth: list) -> float:
     return math.sqrt(acc / len(groundtruth))
 
 
-def posthoc_run_3D_vessel_navigator():
-    # load centerline reference map from file
+def posthoc_run_3D_vessel_navigator(ref_path: str, imp_path: str, displace_path: str, dest_path: str, filename: str):
+    navigator = VesselNavigator()
+    navigator.setup_navigator(reference_path=ref_path,
+                              log_destination_path=dest_path,
+                              filename=filename,
+                              map_type=MapType.MAP_3D,
+                              alpha_center=2,
+                              initial_position_center=30
+                              )
 
-    # load impedance, displacement, and groundtruth
+    impedance = np.load(imp_path)
+    displacements = np.load(displace_path)
 
-    # save positions and particles per step
+    positions = {}
+    particles_per_step = {}
+    clusters_per_step = {}
+
+    for i in range(len(impedance)):
+        estimate = navigator.update_step(displacement=displacements[i], impedance=impedance[i])
+        particles = navigator.get_current_particle_set()
+        particles_per_step[i] = []
+        positions[i] = estimate.get_first_cluster_mean()
+        clusters_per_step[i] = estimate.get_clusters()
+
+        for particle in particles:
+            pos = particle.get_position()["displacement"]
+            branch = particle.get_position()["branch"]
+            particles_per_step[i].append([branch, pos])
+
+    # save particles per step
+    jo = json.dumps(particles_per_step, indent=4)
+
+    with open(dest_path + "particles_per_step.json", "w") as outfile:
+        outfile.write(jo)
+
+    # save positions per step
+    jo2 = json.dumps(positions, indent=4)
+
+    with open(dest_path + "positions.json", "w") as outfile2:
+        outfile2.write(jo2)
+
+    jo2 = json.dumps(clusters_per_step, indent=4)
 
     # save all clusters
-
-
-
-    pass
+    with open(dest_path + "clusters.json", "w") as outfile2:
+        outfile2.write(jo2)
 
 
 def evaluate_performance():

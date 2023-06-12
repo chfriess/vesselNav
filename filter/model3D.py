@@ -22,28 +22,9 @@ class Model3D(ModelInterface):
                               measurement_model: MeasurementType,
                               injector_type: InjectorType,
                               alpha_center: float):
-        #map3D = self.load_map_3D(map_path)
         map3D = Map3D()
-        #map3D.load_map(map_path)
-        aorta_before = [1 / 20 for _ in range(70)]
-        aorta_after = [1 / 20 for _ in range(130)]
-        renal_left = [1 / 15 for _ in range(100)]
-        renal_right = [1 / 15 for _ in range(100)]
-        iliaca_left = [1 / 10 for _ in range(100)]
-        iliaca_right = [1 / 10 for _ in range(100)]
+        map3D.load_map(map_path)
 
-        map3D.add_vessel_impedance_prediction_as_millimeter_list(aorta_before, 0)
-        map3D.add_vessel_impedance_prediction_as_millimeter_list(aorta_after, 1)
-        map3D.add_vessel_impedance_prediction_as_millimeter_list(renal_left, 2)
-        map3D.add_vessel_impedance_prediction_as_millimeter_list(renal_right, 3)
-        map3D.add_vessel_impedance_prediction_as_millimeter_list(iliaca_left, 4)
-        map3D.add_vessel_impedance_prediction_as_millimeter_list(iliaca_right, 5)
-
-        map3D.add_mapping([0, 1])
-        map3D.add_mapping([0, 2])
-        map3D.add_mapping([0, 3])
-        map3D.add_mapping([1, 4])
-        map3D.add_mapping([1, 5])
         if injector_type == InjectorType.ALPHA_VARIANCE:
             injection_strategy = AlphaVariationInjector(alpha_center=alpha_center)
             logging.info("injector: alpha variance")
