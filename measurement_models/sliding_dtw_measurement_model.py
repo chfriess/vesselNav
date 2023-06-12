@@ -1,7 +1,8 @@
 import numpy as np
 from tslearn.metrics import dtw
 from strategies.measurement_strategy import MeasurementStrategy
-from utils.particle_reference_retriever import ParticleReferenceRetriever
+from utils.map3D import Map3D
+from utils.particle_reference_retriever import ParticleReferenceRetriever, ParticleReferenceRetriever3D
 from utils.particle_set import ParticleSet
 
 
@@ -96,4 +97,30 @@ class SlidingCombinedDerivativeDTWMeasurementModel(SlidingDerivativeDTWMeasureme
                 particle.reference_history = particle.reference_history[-20:]
             particle.weight = dtw(self.alpha_derive_series(self.measurement_history),
                                   self.alpha_derive_series(particle.reference_history))
+        return particles
+
+
+class SlidingDTWMeasurementModel3D(MeasurementStrategy):
+    def __init__(self, map3D: Map3D):
+        self.map3D = map3D
+        self.measurement_history = []
+        self.particle_reference_retriever = ParticleReferenceRetriever3D()
+
+    def get_reference(self):
+        return self.map3D
+
+    def reset_measurement_history(self):
+        self.measurement_history = []
+
+    def raw_weight_particles(self, particles: ParticleSet, measurement: float) -> ParticleSet:
+        self.measurement_history.append(measurement)
+        if len(self.measurement_history) > 20:
+            self.measurement_history = self.measurement_history[-20:]
+
+        for particle in particles:
+            particle.reference_history += self.particle_reference_retriever.retrieve_reference_update(
+                particle, self.map3D)
+            if len(particle.reference_history) > 20:
+                particle.reference_history = particle.reference_history[-20:]
+            particle.weight = dtw(self.measurement_history, particle.reference_history)
         return particles

@@ -102,6 +102,9 @@ class ModelInterface:
     def estimate_current_position(self) -> PositionEstimate:
         raise NotImplementedError
 
+    def get_particles(self):
+        return self.particles
+
     def get_current_average_alpha(self) -> float:
         alphas = []
         for particle in self.particles:

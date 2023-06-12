@@ -1,3 +1,4 @@
+from utils.map3D import Map3D
 
 
 class ParticleReferenceRetriever:
@@ -47,3 +48,8 @@ class ParticleReferenceRetriever:
             if 0 <= index:
                 reference_update.append(reference_signal[index])
         return reference_update
+
+
+class ParticleReferenceRetriever3D:
+    def retrieve_reference_update(self, particle, map3D: Map3D) -> list:
+        pass

@@ -133,8 +133,7 @@ class Model(ModelInterface):
         key, values = d
         return len(values)
 
-    def get_particles(self):
-        return self.particles
+
 
     def estimate_current_position(self) -> PositionEstimate:
         positions = [particle.state.position for particle in self.particles]

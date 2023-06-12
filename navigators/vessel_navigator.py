@@ -1,3 +1,4 @@
+import json
 import logging
 
 import numpy as np
@@ -115,16 +116,37 @@ if __name__ == "__main__":
                               log_destination_path=dest_path,
                               filename=file,
                               map_type=MapType.MAP_3D,
-                              alpha_center=2
+                              alpha_center=2,
+                              initial_position_center=30
                               )
 
     impedance = np.load(imp_path)/100000
     displacements = np.load(displace_path)
 
+    positions = {}
+    particles_per_step = {}
+
     for i in range(len(impedance)):
         estimate = navigator.update_step(displacement=displacements[i], impedance=impedance[i])
-        print(estimate.get_first_cluster_mean())
+        particles = navigator.get_current_particle_set()
+        particles_per_step[i] = []
+        positions[i] = estimate.get_first_cluster_mean()
 
+        for particle in particles:
+            pos = particle.get_position()["displacement"]
+            branch = particle.get_position()["branch"]
+            particles_per_step[i].append([branch, pos])
+
+
+    jo = json.dumps(particles_per_step, indent=4)
+
+    with open(dest_path+"particles_per_step.json", "w") as outfile:
+        outfile.write(jo)
+
+    jo2 = json.dumps(positions, indent=4)
+
+    with open(dest_path + "positions.json", "w") as outfile2:
+        outfile2.write(jo2)
 
 """
      
