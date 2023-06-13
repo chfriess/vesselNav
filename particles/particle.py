@@ -57,7 +57,7 @@ class SlidingParticle(Particle):
                  weight: float = 0) -> None:
         super().__init__(state, weight)
         self.reference_history = []
-        self.last_reference_index = 0
+        self.last_reference_index = round(state.get_position())
 
     def __str__(self):
         return f'[State: {str(self.state)} | Weight: {self.weight} | ReferenceHistory: {str(self.reference_history)}]'
@@ -76,7 +76,8 @@ class SlidingParticle3D(Particle3D):
                  weight: float = 0) -> None:
         super().__init__(state, weight)
         self.reference_history = []
-        self.last_reference_index = {"branch_index": 0, "displacement_index": 0}
+        self.last_reference_index = {"branch_index": state.get_position()["branch"],
+                                     "displacement_index": round(state.get_position()["displacement"])}
 
     def __str__(self):
         return f'[State: {str(self.state)} | Weight: {self.weight} | ReferenceHistory: {str(self.reference_history)}]'

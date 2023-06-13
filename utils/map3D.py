@@ -28,6 +28,12 @@ class Map3D:
         return False
 
     def add_vessel_impedance_prediction_per_position_in_mm(self, positions: list, diameters: list, index: int):
+        if len(self.vessels) > 0 and max(list(self.vessels.keys())) == index:
+            raise ValueError("Vessels with index: "
+                             + str(max(list(self.vessels.keys()))) + str(" was already added"))
+        if len(self.vessels) > 0 and max(list(self.vessels.keys())) != index-1:
+            raise ValueError("Vessels must be added in ascending order; last added index was: "
+                             + str(max(list(self.vessels.keys()))))
         if not positions[0] == 0:
             raise ValueError("must provide diameter of vessel beginn")
         x = np.linspace(0, positions[-1], round(positions[-1]))
@@ -35,6 +41,12 @@ class Map3D:
         self.add_vessel_impedance_prediction_as_millimeter_list(vessel=list(diameters), index=index)
 
     def add_vessel_impedance_prediction_as_millimeter_list(self, vessel: list, index: int):
+        if len(self.vessels) > 0 and max(list(self.vessels.keys())) == index:
+            raise ValueError("Vessels with index: "
+                             + str(max(list(self.vessels.keys()))) + str(" was already added"))
+        if len(self.vessels) > 0 and max(list(self.vessels.keys())) != index-1:
+            raise ValueError("Vessels must be added in ascending order; last added index was: "
+                             + str(max(list(self.vessels.keys()))))
         if not all(isinstance(x, numbers.Number) for x in vessel):
             raise ValueError("The diameters of a vessel can only contain numeric values")
         if index in self.vessels.keys():
