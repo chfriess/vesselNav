@@ -79,7 +79,6 @@ def posthoc_run_3D_vessel_navigator(ref_path: str,
     with open(dest_path + "clusters.json", "w") as outfile2:
         outfile2.write(jo2)
 
-    os.chdir(dest_path)
     posest = []
     err = []
 
@@ -97,13 +96,13 @@ def posthoc_run_3D_vessel_navigator(ref_path: str,
             posest_2.append(positionEstimate.first_cluster.center)
             err_2.append(positionEstimate.first_cluster.error)
 
-    np.save("best cluster means", np.array(posest))
-    np.save("best cluster variances", np.array(err))
+    np.save(dest_path + "best cluster means", np.array(posest))
+    np.save(dest_path + "best cluster variances", np.array(err))
 
-    np.save("second best cluster means", np.array(posest_2))
-    np.save("second best cluster variances", np.array(err_2))
+    np.save(dest_path +"second best cluster means", np.array(posest_2))
+    np.save(dest_path +"second best cluster variances", np.array(err_2))
 
-    np.save("alpha estimates", np.array(alpha_estimates))
+    np.save(dest_path +"alpha estimates", np.array(alpha_estimates))
 
     acc = []
     for index in range(len(grtruth)):
@@ -213,4 +212,13 @@ def calculate_post_hoc_accuracy():
 
 
 if __name__ == "__main__":
+    sample_nr = "20"
+    ref_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\" + "reference_from_iliaca.npy"
+    imp_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr + "\\data_sample_" \
+               + sample_nr + "\\impedance_from_iliaca.npy"
+    grtruth_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr + \
+                   "\\data_sample_" + sample_nr + "\\groundtruth_from_iliaca.npy"
+    displace_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
+                    + "\\data_sample_" + sample_nr + "\\displacements_from_iliaca.npy"
+    dest_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\"
     posthoc_run_3D_vessel_navigator()
