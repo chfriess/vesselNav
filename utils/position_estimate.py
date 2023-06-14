@@ -146,16 +146,24 @@ class ClusterPositionEstimate3D(PositionEstimate):
         return second_best_cluster
 
     def get_first_cluster_mean(self):
-        return self.get_first_cluster().get_center(), self.get_first_cluster().get_branch()
+        return [self.get_first_cluster().get_center(), self.get_first_cluster().get_branch()]
 
     def get_first_cluster_error(self):
         return self.get_first_cluster().get_error()
 
     def get_second_cluster_mean(self):
-        return self.get_second_cluster().get_center(), self.get_second_cluster().get_branch()
+        second_cluster = self.get_second_cluster()
+        if second_cluster is not None:
+            return [self.get_second_cluster().get_center(), self.get_second_cluster().get_branch()]
+        else:
+            return self.get_first_cluster_mean()
 
     def get_second_cluster_error(self):
-        return self.get_second_cluster().get_center(), self.get_second_cluster().get_branch()
+        second_cluster = self.get_second_cluster()
+        if second_cluster is not None:
+            return second_cluster.get_error()
+        else:
+            return self.get_first_cluster_error()
 
     def get_number_of_clusters(self):
         pass

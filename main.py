@@ -48,6 +48,12 @@ def posthoc_run_3D_vessel_navigator(ref_path: str,
     clusters_per_step = {}
     alpha_estimates = []
 
+    posest = []
+    err = []
+
+    posest_2 = []
+    err_2 = []
+
     for i in range(len(impedance)):
         estimate = navigator.update_step(displacement=displacements[i], impedance=impedance[i])
         alpha_estimates.append(navigator.get_current_average_alpha())
@@ -55,6 +61,16 @@ def posthoc_run_3D_vessel_navigator(ref_path: str,
         particles_per_step[i] = []
         positions[i] = estimate.get_first_cluster_mean()
         clusters_per_step[i] = estimate.get_clusters()
+        posest.append(estimate.get_first_cluster_mean()[0])
+
+        err.append(estimate.get_first_cluster_error())
+        posest_2.append(estimate.get_second_cluster_mean()[0])
+
+        err_2.append(estimate.get_second_cluster_error())
+        print("[UPDATE STEP] " + str(i) + ": " + str(positions[i]))
+        print("[FIRST CLUSTER MEAN] =" + str(estimate.get_first_cluster_mean()[0]))
+        print("[SECOND CLUSTER MEAN] =" + str(estimate.get_second_cluster_mean()[0]))
+        print("\n\n")
 
         for particle in particles:
             pos = particle.get_position()["displacement"]
@@ -73,28 +89,11 @@ def posthoc_run_3D_vessel_navigator(ref_path: str,
     with open(dest_path + "positions.json", "w") as outfile2:
         outfile2.write(jo2)
 
-    jo2 = json.dumps(clusters_per_step, indent=4)
+    #jo3 = json.dumps(clusters_per_step, indent=4)
 
     # save all clusters
-    with open(dest_path + "clusters.json", "w") as outfile2:
-        outfile2.write(jo2)
-
-    posest = []
-    err = []
-
-    posest_2 = []
-    err_2 = []
-    for positionEstimate in clusters_per_step.values():
-        posest.append(positionEstimate.first_cluster.center)
-        err.append(positionEstimate.first_cluster.error)
-
-        if positionEstimate.second_cluster is not None:
-            posest_2.append(positionEstimate.second_cluster.center)
-
-            err_2.append(positionEstimate.second_cluster.error)
-        else:
-            posest_2.append(positionEstimate.first_cluster.center)
-            err_2.append(positionEstimate.first_cluster.error)
+    #with open(dest_path + "clusters.json", "w") as outfile3:
+        #outfile2.write(jo3)
 
     np.save(dest_path + "best cluster means", np.array(posest))
     np.save(dest_path + "best cluster variances", np.array(err))
@@ -104,11 +103,13 @@ def posthoc_run_3D_vessel_navigator(ref_path: str,
 
     np.save(dest_path +"alpha estimates", np.array(alpha_estimates))
 
-    acc = []
-    for index in range(len(grtruth)):
-        acc.append(posest[index] - grtruth[index])
 
-    np.save("pf estimate errors from groundtruth", np.array(acc))
+
+    acc = []
+    for index in range(len(positions)):
+        acc.append(positions[index][0] - grtruth[1:][index])
+
+    np.save(dest_path + "pf estimate errors from groundtruth", np.array(acc))
 
     logging.info(
         "final difference estimate vs. groundtruth = " + str(grtruth[-1] - posest[-1]))
@@ -221,4 +222,9 @@ if __name__ == "__main__":
     displace_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
                     + "\\data_sample_" + sample_nr + "\\displacements_from_iliaca.npy"
     dest_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\"
-    posthoc_run_3D_vessel_navigator()
+    posthoc_run_3D_vessel_navigator(ref_path=ref_path,
+                                    imp_path=imp_path,
+                                    grtruth_path=grtruth_path,
+                                    displace_path=displace_path,
+                                    dest_path=dest_path,
+                                    filename="test")

@@ -49,20 +49,20 @@ class MotionModel3D(MotionStrategy):
             if 0 < position_estimate < len(self.map3D.get_vessel(particle.get_position()["branch"])):
                 particle.state.set_position(random.normal(loc=position_estimate, scale=error))
             elif position_estimate < 0:
-
                 current_index = particle.get_position()["branch"]
-                current_predecessor = self.map3D.get_vessel(current_index)
                 while position_estimate < 0:
+                    if current_index == -1:
+                        position_estimate = 0
+                        break
+                    else:
+                        current_predecessor = self.map3D.get_vessel(current_index)
+                        position_estimate = len(current_predecessor) + position_estimate
+                        current_index = self.map3D.get_index_of_predecessor(current_index)
 
-                    current_index = self.map3D.get_index_of_predecessor(current_index)
-                    current_predecessor = self.map3D.get_vessel(current_index)
-                    position_estimate = len(current_predecessor) + position_estimate
-                # TODO after testing: cleanup, just acces current_predecessor
-                if current_index is not -1:
-                    particle.state.set_position(random.normal(loc=position_estimate, scale=error))
-                    particle.state.set_branch(current_index)
-                else:
-                    particle.state.set_position(0)
+                # TODO now it also shows some variation if the position estimate is set to zero, is this okay?
+                particle.state.set_position(random.normal(loc=position_estimate, scale=error))
+                particle.state.set_branch(current_index)
+
             else:
                 successor_index = particle.get_position()["branch"]
                 current_branch = self.map3D.get_vessel(successor_index)
