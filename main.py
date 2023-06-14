@@ -1,8 +1,15 @@
 import json
 import math
+import os
 import time
+from statistics import mean
+
 import numpy as np
 from matplotlib import pyplot as plt
+import logging
+
+from scipy.stats import sem
+
 from navigators.post_hoc_vessel_navigator import PostHocVesselNavigator
 from navigators.vessel_navigator import VesselNavigator
 from utils.particle_filter_component_enums import MeasurementType, InjectorType, MapType
@@ -17,7 +24,12 @@ def rms(signal: list, groundtruth: list) -> float:
     return math.sqrt(acc / len(groundtruth))
 
 
-def posthoc_run_3D_vessel_navigator(ref_path: str, imp_path: str, displace_path: str, dest_path: str, filename: str):
+def posthoc_run_3D_vessel_navigator(ref_path: str,
+                                    imp_path: str,
+                                    grtruth_path: str,
+                                    displace_path: str,
+                                    dest_path: str,
+                                    filename: str):
     navigator = VesselNavigator()
     navigator.setup_navigator(reference_path=ref_path,
                               log_destination_path=dest_path,
@@ -29,13 +41,16 @@ def posthoc_run_3D_vessel_navigator(ref_path: str, imp_path: str, displace_path:
 
     impedance = np.load(imp_path)
     displacements = np.load(displace_path)
+    grtruth = np.load(grtruth_path)
 
     positions = {}
     particles_per_step = {}
     clusters_per_step = {}
+    alpha_estimates = []
 
     for i in range(len(impedance)):
         estimate = navigator.update_step(displacement=displacements[i], impedance=impedance[i])
+        alpha_estimates.append(navigator.get_current_average_alpha())
         particles = navigator.get_current_particle_set()
         particles_per_step[i] = []
         positions[i] = estimate.get_first_cluster_mean()
@@ -63,6 +78,45 @@ def posthoc_run_3D_vessel_navigator(ref_path: str, imp_path: str, displace_path:
     # save all clusters
     with open(dest_path + "clusters.json", "w") as outfile2:
         outfile2.write(jo2)
+
+    os.chdir(dest_path)
+    posest = []
+    err = []
+
+    posest_2 = []
+    err_2 = []
+    for positionEstimate in clusters_per_step.values():
+        posest.append(positionEstimate.first_cluster.center)
+        err.append(positionEstimate.first_cluster.error)
+
+        if positionEstimate.second_cluster is not None:
+            posest_2.append(positionEstimate.second_cluster.center)
+
+            err_2.append(positionEstimate.second_cluster.error)
+        else:
+            posest_2.append(positionEstimate.first_cluster.center)
+            err_2.append(positionEstimate.first_cluster.error)
+
+    np.save("best cluster means", np.array(posest))
+    np.save("best cluster variances", np.array(err))
+
+    np.save("second best cluster means", np.array(posest_2))
+    np.save("second best cluster variances", np.array(err_2))
+
+    np.save("alpha estimates", np.array(alpha_estimates))
+
+    acc = []
+    for index in range(len(grtruth)):
+        acc.append(posest[index] - grtruth[index])
+
+    np.save("pf estimate errors from groundtruth", np.array(acc))
+
+    logging.info(
+        "final difference estimate vs. groundtruth = " + str(grtruth[-1] - posest[-1]))
+    logging.info("Mean absolute deviation of PF estimate from groundtruth in mm = " + str(mean(acc)))
+    logging.info("Sem of Mean absolute deviation of PF estimate from groundtruth in mm = " + str(sem(acc)))
+    logging.info("Mean particle dispersion at each time step as sem of dominant cluster = " + str(sem(err)))
+
 
 
 def evaluate_performance():
@@ -159,4 +213,4 @@ def calculate_post_hoc_accuracy():
 
 
 if __name__ == "__main__":
-    calculate_post_hoc_accuracy()
+    posthoc_run_3D_vessel_navigator()

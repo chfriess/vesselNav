@@ -131,8 +131,19 @@ class ClusterPositionEstimate3D(PositionEstimate):
         return best_cluster
 
     def get_second_cluster(self):
-        # TODO implement fast version to do this
-        pass
+        # TODO: speed up of this temporary hack
+        if len(self.clusters) == 0:
+            return None
+        best_cluster = None
+        second_best_cluster = None
+        best_cluster_size = 0
+        for branch in self.clusters.keys():
+            for cluster in self.clusters[branch]:
+                if cluster.get_number_of_particles() > best_cluster_size:
+                    second_best_cluster = best_cluster
+                    best_cluster = cluster
+                    best_cluster_size = cluster.get_number_of_particles()
+        return second_best_cluster
 
     def get_first_cluster_mean(self):
         return self.get_first_cluster().get_center(), self.get_first_cluster().get_branch()
@@ -141,17 +152,13 @@ class ClusterPositionEstimate3D(PositionEstimate):
         return self.get_first_cluster().get_error()
 
     def get_second_cluster_mean(self):
-        # TODO implement fast version to do this
-        pass
+        return self.get_second_cluster().get_center(), self.get_second_cluster().get_branch()
 
     def get_second_cluster_error(self):
-        # TODO implement fast version to do this
-        pass
+        return self.get_second_cluster().get_center(), self.get_second_cluster().get_branch()
 
     def get_number_of_clusters(self):
-        # TODO implement fast version to do this
         pass
 
     def get_number_of_noise(self):
-        # TODO implement fast version to do this
-        pass
+        raise NotImplementedError("Number of noise points not implemented for 3D position estimate")

@@ -79,6 +79,10 @@ class VesselNavigator(Navigator):
     def get_current_particle_set(self):
         return self.model.get_particles()
 
+
+    def get_current_average_alpha(self):
+        return self.model.get_current_average_alpha()
+
     def update_step(self, displacement: float, impedance: float) -> PositionEstimate:
         self.model.update_model(displacement=displacement, impedance=impedance)
         return self.model.estimate_current_position()
