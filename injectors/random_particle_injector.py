@@ -6,22 +6,6 @@ from utils.map3D import Map3D
 from utils.particle_set import ParticleSet
 
 
-class RandomParticleInjector(InjectionStrategy):
-
-    def __init__(self,
-                 map_borders: list):
-        self.map_borders = map_borders
-
-    def inject(self, particles: ParticleSet) -> ParticleSet:
-        if random.uniform(0, 1) <= 0.2:
-            number_injected_particles = int(len(particles) * 0.05)
-            particles.sort_ascending_by_weight()
-            for index in range(number_injected_particles):
-                particles[index].state.position = random.normal(loc=particles[index].state.position, scale=0.1)
-                particles[index].state.alpha = random.normal(loc=particles[index].state.alpha, scale=0.1)
-        return particles
-
-
 class RandomParticleInjector3D(InjectionStrategy):
 
     def __init__(self, map3D: Map3D):

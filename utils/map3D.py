@@ -27,13 +27,16 @@ class Map3D:
             return self.vessels == other.vessels and self.mappings == other.mappings
         return False
 
-    def add_vessel_impedance_prediction_per_position_in_mm(self, positions: list, diameters: list, index: int):
+    def check_right_vessel_format(self, index: int):
         if len(self.vessels) > 0 and max(list(self.vessels.keys())) == index:
             raise ValueError("Vessels with index: "
                              + str(max(list(self.vessels.keys()))) + str(" was already added"))
         if len(self.vessels) > 0 and max(list(self.vessels.keys())) != index-1:
             raise ValueError("Vessels must be added in ascending order; last added index was: "
                              + str(max(list(self.vessels.keys()))))
+
+    def add_vessel_impedance_prediction_per_position_in_mm(self, positions: list, diameters: list, index: int):
+        self.check_right_vessel_format(index=index)
         if not positions[0] == 0:
             raise ValueError("must provide diameter of vessel beginn")
         x = np.linspace(0, positions[-1], round(positions[-1]))
@@ -41,16 +44,9 @@ class Map3D:
         self.add_vessel_impedance_prediction_as_millimeter_list(vessel=list(diameters), index=index)
 
     def add_vessel_impedance_prediction_as_millimeter_list(self, vessel: list, index: int):
-        if len(self.vessels) > 0 and max(list(self.vessels.keys())) == index:
-            raise ValueError("Vessels with index: "
-                             + str(max(list(self.vessels.keys()))) + str(" was already added"))
-        if len(self.vessels) > 0 and max(list(self.vessels.keys())) != index-1:
-            raise ValueError("Vessels must be added in ascending order; last added index was: "
-                             + str(max(list(self.vessels.keys()))))
+        self.check_right_vessel_format(index=index)
         if not all(isinstance(x, numbers.Number) for x in vessel):
             raise ValueError("The diameters of a vessel can only contain numeric values")
-        if index in self.vessels.keys():
-            raise ValueError("Vessel with index " + str(index) + " already preset in the map")
         self.vessels[index] = vessel
 
     def add_mapping(self, mapping: list):
@@ -109,4 +105,3 @@ class Map3D:
         keys = [key for key in self.vessels.keys()]
         for key in keys:
             self.vessels[int(key)] = self.vessels.pop(key)
-

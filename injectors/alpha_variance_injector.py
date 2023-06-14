@@ -1,7 +1,4 @@
 from numpy import random
-
-from particles.particle import Particle3D
-from particles.state import State3D
 from strategies.injection_strategy import InjectionStrategy
 from utils.particle_set import ParticleSet
 
@@ -25,4 +22,3 @@ class AlphaVariationInjector(InjectionStrategy):
         for index in range(number_injected_particles):
             particles[index].state.alpha = random.normal(loc=particles[index].state.alpha, scale=self.alpha_variance)
         return particles
-

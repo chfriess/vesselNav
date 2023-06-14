@@ -43,33 +43,6 @@ class Particle3D(Particle):
         super().__init__(state, weight)
 
 
-class AlphaMapParticle(Particle):
-
-    def __init__(self, state: State, len1Dreference):
-        super().__init__(state)
-        self.map = [state.alpha for _ in range(len1Dreference)]
-
-
-class SlidingParticle(Particle):
-
-    def __init__(self,
-                 state: State,
-                 weight: float = 0) -> None:
-        super().__init__(state, weight)
-        self.reference_history = []
-        self.last_reference_index = round(state.get_position())
-
-    def __str__(self):
-        return f'[State: {str(self.state)} | Weight: {self.weight} | ReferenceHistory: {str(self.reference_history)}]'
-
-    def __eq__(self, other):
-        if isinstance(other, SlidingParticle):
-            return self.state == other.state \
-                and self.weight == other.weight \
-                and self.reference_history == other.reference_history
-        return False
-
-
 class SlidingParticle3D(Particle3D):
     def __init__(self,
                  state: State3D,
@@ -83,7 +56,7 @@ class SlidingParticle3D(Particle3D):
         return f'[State: {str(self.state)} | Weight: {self.weight} | ReferenceHistory: {str(self.reference_history)}]'
 
     def __eq__(self, other):
-        if isinstance(other, SlidingParticle):
+        if isinstance(other, SlidingParticle3D):
             return self.state == other.state \
                 and self.weight == other.weight \
                 and self.reference_history == other.reference_history

@@ -1,8 +1,5 @@
 import copy
 import random
-
-from particles.particle import Particle3D, Particle
-from particles.state import State3D, State
 from strategies.resampling_strategy import ResamplingStrategy
 from utils.particle_set import ParticleSet
 

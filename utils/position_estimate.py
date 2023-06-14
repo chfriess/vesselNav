@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from utils.position import Position, Position3D
+from utils.position import Position3D
 
 
 class PositionEstimate:
@@ -39,63 +39,6 @@ class PositionEstimate:
     @abstractmethod
     def get_number_of_noise(self):
         raise NotImplementedError
-
-
-class ClusterPositionEstimate(PositionEstimate):
-
-    def __init__(self,
-                 first_cluster: Position,
-                 second_cluster: Position,
-                 number_of_clusters: int,
-                 number_of_noise: int) -> None:
-        self.first_cluster = first_cluster
-        self.second_cluster = second_cluster
-        self.number_of_clusters = number_of_clusters
-        self.number_of_noise = number_of_noise
-
-    def __str__(self):
-        return f'[first cluster: {str(self.first_cluster)} | second cluster: {str(self.second_cluster)} | ' \
-               f'number of clusters: {str(self.number_of_clusters)} |' \
-               f' number of noise points: {str(self.number_of_noise)}   ]'
-
-    def get_clusters(self):
-        return [self.first_cluster, self.second_cluster]
-
-    def get_first_cluster(self):
-        return self.first_cluster
-
-    def get_second_cluster(self):
-        return self.second_cluster
-
-    def get_first_cluster_mean(self):
-        if self.first_cluster is not None:
-            return self.first_cluster.center
-        else:
-            return "__"
-
-    def get_first_cluster_error(self):
-        if self.first_cluster is not None:
-            return self.first_cluster.error
-        else:
-            return "__"
-
-    def get_second_cluster_mean(self):
-        if self.second_cluster is not None:
-            return self.second_cluster.center
-        else:
-            return "__"
-
-    def get_second_cluster_error(self):
-        if self.second_cluster is not None:
-            return self.second_cluster.error
-        else:
-            return "__"
-
-    def get_number_of_clusters(self):
-        return self.number_of_clusters
-
-    def get_number_of_noise(self):
-        return self.number_of_noise
 
 
 class ClusterPositionEstimate3D(PositionEstimate):

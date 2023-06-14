@@ -1,14 +1,13 @@
 import logging
-from filter.model import Model
 from filter.model3D import Model3D
 from navigators.navigator_interface import Navigator
 from utils.position_estimate import PositionEstimate
-from utils.particle_filter_component_enums import MeasurementType, InjectorType, MapType
+from utils.particle_filter_component_enums import MeasurementType, InjectorType
 
 
 class VesselNavigator(Navigator):
 
-    def __init__(self, model: Model = None):
+    def __init__(self, model: Model3D = None):
         self.model = model
         self.impedance_normalizer = 1
         self.impedance_history = []
@@ -36,7 +35,6 @@ class VesselNavigator(Navigator):
                         reference_path: str,
                         log_destination_path: str,
                         filename: str,
-                        map_type: MapType = MapType.MAP_1D,
                         measurement_type: MeasurementType = MeasurementType.AHISTORIC,
                         injector_type: InjectorType = InjectorType.ALPHA_VARIANCE,
                         number_of_particles: int = 1000,
@@ -46,39 +44,24 @@ class VesselNavigator(Navigator):
                         alpha_center: float = 1.5,
                         alpha_variance: float = 0.1
                         ):
-        if map_type == MapType.MAP_1D:
-            self.model = Model()
-            self.model.setup_particle_filter(map_path=reference_path,
-                                             measurement_model=measurement_type,
-                                             injector_type=injector_type,
-                                             alpha_center=alpha_center)
-            self.model.setup_particles(number_of_particles=number_of_particles,
-                                       initial_position_center=initial_position_center,
-                                       initial_position_variance=initial_position_variance,
-                                       alpha_center=alpha_center,
-                                       alpha_variance=alpha_variance
-                                       )
-
-        else:
-            self.model = Model3D()
-            self.model.setup_particle_filter(map_path=reference_path,
-                                             measurement_model=measurement_type,
-                                             injector_type=injector_type,
-                                             alpha_center=alpha_center)
-            self.model.setup_particles(number_of_particles=number_of_particles,
-                                       initial_position_center=initial_position_center,
-                                       initial_position_variance=initial_position_variance,
-                                       alpha_center=alpha_center,
-                                       alpha_variance=alpha_variance,
-                                       initial_branch=initial_branch
-                                       )
+        self.model = Model3D()
+        self.model.setup_particle_filter(map_path=reference_path,
+                                         measurement_model=measurement_type,
+                                         injector_type=injector_type,
+                                         alpha_center=alpha_center)
+        self.model.setup_particles(number_of_particles=number_of_particles,
+                                   initial_position_center=initial_position_center,
+                                   initial_position_variance=initial_position_variance,
+                                   alpha_center=alpha_center,
+                                   alpha_variance=alpha_variance,
+                                   initial_branch=initial_branch
+                                   )
         self.model.setup_logger(loglevel=logging.INFO,
                                 log_directory=log_destination_path,
                                 filename=filename + "_log")
 
     def get_current_particle_set(self):
         return self.model.get_particles()
-
 
     def get_current_average_alpha(self):
         return self.model.get_current_average_alpha()

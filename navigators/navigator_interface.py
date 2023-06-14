@@ -1,19 +1,13 @@
 import math
-import statistics
-
 import numpy as np
 
 
 class Navigator:
 
-
-
     @staticmethod
     def load_values(path: str):
         values = np.load(path)
         return list(values)
-
-
 
     @staticmethod
     def rms(signal: list, groundtruth: list) -> float:
@@ -43,7 +37,3 @@ class Navigator:
         for i in range(80):
             reference.append((1 / 1.3) * 100)
         return reference
-
-
-
-

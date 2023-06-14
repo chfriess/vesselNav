@@ -63,5 +63,3 @@ class State3D(State):
 
     def get_displacement(self):
         return self.position
-
-
