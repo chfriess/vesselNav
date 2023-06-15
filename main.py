@@ -14,13 +14,27 @@ def posthoc_run_3D_vessel_navigator(ref_path: str,
                                     grtruth_path: str,
                                     displace_path: str,
                                     dest_path: str,
-                                    filename: str):
+                                    filename: str,
+                                    measurement_type: MeasurementType = MeasurementType.AHISTORIC,
+                                    injector_type: InjectorType = InjectorType.ALPHA_VARIANCE,
+                                    number_of_particles: int = 1000,
+                                    initial_branch: int = 0,
+                                    initial_position_center: float = 0,
+                                    initial_position_variance: float = 0.5,
+                                    alpha_center: float = 1.5,
+                                    alpha_variance: float = 0.1):
     navigator = VesselNavigator()
     navigator.setup_navigator(reference_path=ref_path,
                               log_destination_path=dest_path,
                               filename=filename,
-                              alpha_center=2,
-                              initial_position_center=30
+                              measurement_type=measurement_type,
+                              injector_type=injector_type,
+                              number_of_particles=number_of_particles,
+                              initial_branch=initial_branch,
+                              initial_position_center=initial_position_center,
+                              initial_position_variance=initial_position_variance,
+                              alpha_center=alpha_center,
+                              alpha_variance=alpha_variance
                               )
 
     impedance = np.load(imp_path)
@@ -153,9 +167,12 @@ if __name__ == "__main__":
     displacement_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
                         + "\\data_sample_" + sample_nr + "\\displacements_from_iliaca.npy"
     destination_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\"
+    grtruth = np.load(groundtruth_path)
     posthoc_run_3D_vessel_navigator(ref_path=reference_path,
                                     imp_path=impedance_path,
                                     grtruth_path=groundtruth_path,
                                     displace_path=displacement_path,
                                     dest_path=destination_path,
-                                    filename="test")
+                                    filename="test",
+                                    initial_position_center=grtruth[0],
+                                    initial_branch=0)
