@@ -91,7 +91,7 @@ def posthoc_run_3D_vessel_navigator(ref_path: str,
 
     # save all clusters
     # with open(dest_path + "clusters.json", "w") as outfile3:
-    # outfile2.write(jo3)
+    # outfile3.write(jo3)
 
     np.save(dest_path + "best cluster means", np.array(posest))
     np.save(dest_path + "best cluster variances", np.array(err))
@@ -167,12 +167,12 @@ if __name__ == "__main__":
     displacement_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
                         + "\\data_sample_" + sample_nr + "\\displacements_from_iliaca.npy"
     destination_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\"
-    grtruth = np.load(groundtruth_path)
+    groundtruth = np.load(groundtruth_path)
     posthoc_run_3D_vessel_navigator(ref_path=reference_path,
                                     imp_path=impedance_path,
                                     grtruth_path=groundtruth_path,
                                     displace_path=displacement_path,
                                     dest_path=destination_path,
                                     filename="test",
-                                    initial_position_center=grtruth[0],
+                                    initial_position_center=groundtruth[0],
                                     initial_branch=0)

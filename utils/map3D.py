@@ -59,6 +59,9 @@ class Map3D:
     def get_vessels(self):
         return self.vessels
 
+    def get_number_of_vessels(self):
+        return len(self.vessels)
+
     def get_mappings(self):
         return self.mappings
 

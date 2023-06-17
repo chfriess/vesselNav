@@ -15,19 +15,14 @@ class ParticleFilter:
         self.measurement_strategy = measurement_strategy
         self.resampler = resampler
         self.injector = injector
-        self.displacement_history = []
-        self.impedance_history = []
 
     def get_reference(self):
-        return self.measurement_strategy.get_reference()
+        return self.measurement_strategy.get_reference()  # TODO add Return value and do I even need it?
 
     def filter(self,
                previous_particle_set: ParticleSet,
                displacement_measurement: float,
                impedance_measurement: float) -> ParticleSet:
-        self.displacement_history.append(displacement_measurement)
-        self.impedance_history.append(impedance_measurement)
-
         prediction_particle_set = self.motion_model.move_particles(
             previous_particle_set=previous_particle_set,
             displacement_measurement=displacement_measurement)
@@ -37,4 +32,5 @@ class ParticleFilter:
             measurement=impedance_measurement)
 
         resampled_particle_set = self.resampler.resample(weighted_particle_set)
-        return self.injector.inject(resampled_particle_set)
+        injected_particle_set = self.injector.inject(resampled_particle_set)
+        return injected_particle_set

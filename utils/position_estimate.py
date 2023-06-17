@@ -1,5 +1,4 @@
 from abc import abstractmethod
-
 from utils.position import Position3D
 
 
@@ -34,10 +33,6 @@ class PositionEstimate:
 
     @abstractmethod
     def get_number_of_clusters(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_number_of_noise(self):
         raise NotImplementedError
 
 
@@ -109,7 +104,4 @@ class ClusterPositionEstimate3D(PositionEstimate):
             return self.get_first_cluster_error()
 
     def get_number_of_clusters(self):
-        pass
-
-    def get_number_of_noise(self):
-        raise NotImplementedError("Number of noise points not implemented for 3D position estimate")
+        return self.number_of_clusters

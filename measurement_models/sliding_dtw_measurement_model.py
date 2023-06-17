@@ -72,7 +72,7 @@ class SlidingDerivativeDTWMeasurementModel3D(SlidingDTWMeasurementModel3D):
 
 class SlidingCombinedDerivativeDTWMeasurementModel3D(SlidingDerivativeDTWMeasurementModel3D):
 
-    def alpha_derive_series(self, series: list) -> list:
+    def convex_combine_derived_and_raw_series(self, series: list) -> list:
         alpha = 0.5
         if len(series) < 3:
             return series
@@ -91,6 +91,6 @@ class SlidingCombinedDerivativeDTWMeasurementModel3D(SlidingDerivativeDTWMeasure
                 particle, self.map3D)
             if len(particle.reference_history) > 20:
                 particle.reference_history = particle.reference_history[-20:]
-            particle.weight = dtw(self.alpha_derive_series(self.measurement_history),
-                                  self.alpha_derive_series(particle.reference_history))
+            particle.weight = dtw(self.convex_combine_derived_and_raw_series(self.measurement_history),
+                                  self.convex_combine_derived_and_raw_series(particle.reference_history))
         return particles
