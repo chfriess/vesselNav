@@ -35,19 +35,22 @@ class Map3D:
             raise ValueError("Vessels must be added in ascending order; last added index was: "
                              + str(max(list(self.vessels.keys()))))
 
-    def add_vessel_impedance_prediction_per_position_in_mm(self, positions: list, diameters: list, index: int):
+    def add_vessel_impedance_prediction_per_position_in_mm(self, positions: list, reference_values: list, index: int):
         self.check_right_vessel_format(index=index)
-        if not positions[0] == 0:
-            raise ValueError("must provide diameter of vessel beginn")
-        x = np.linspace(0, positions[-1], round(positions[-1]))
-        diameters = np.interp(x, positions, diameters)
-        self.add_vessel_impedance_prediction_as_millimeter_list(vessel=list(diameters), index=index)
-
-    def add_vessel_impedance_prediction_as_millimeter_list(self, vessel: list, index: int):
-        self.check_right_vessel_format(index=index)
-        if not all(isinstance(x, numbers.Number) for x in vessel):
-            raise ValueError("The diameters of a vessel can only contain numeric values")
+        if not len(positions) == len(reference_values):
+            raise ValueError("Number of positions and number of diameters must be equal to map correspondences")
+        vessel = []
+        for i, position in enumerate(positions):
+            vessel.append({"centerline_position": position, "reference_signal": reference_values[i]})
         self.vessels[index] = vessel
+
+    def add_vessel_impedance_prediction_as_millimeter_list(self, reference_values: list, index: int):
+        if not all(isinstance(x, numbers.Number) for x in reference_values):
+            raise ValueError("The reference of a vessel can only contain numeric values")
+        positions = [x for x in range(len(reference_values))]
+        self.add_vessel_impedance_prediction_per_position_in_mm(positions=positions,
+                                                                reference_values=reference_values,
+                                                                index=index)
 
     def add_mapping(self, mapping: list):
         if not all(isinstance(x, int) for x in mapping):
@@ -84,6 +87,27 @@ class Map3D:
         if not successor_indices:
             return []
         return successor_indices
+
+    def get_reference_value(self, branch: int, displacement: float) -> float:
+        if branch not in self.vessels.keys():
+            raise ValueError("No vessel branch with index " + str(branch) + " in the map")
+        current_vessel = self.vessels[branch]
+        if displacement <= current_vessel[0]["centerline_position"]:
+            return current_vessel[0]["reference_signal"]
+        elif displacement >= current_vessel[-1]["centerline_position"]:
+            return current_vessel[-1]["reference_signal"]
+        else:
+            index = 0
+            while displacement > current_vessel[index]["centerline_position"]:
+                index += 1
+            if not current_vessel[index-1]["centerline_position"] <= displacement\
+                   <= current_vessel[index]["centerline_position"]:
+                raise ValueError("Error in get_reference_value function:"
+                                 " displacement could not be located between to adjacent centerline points")
+            x = [current_vessel[index-1]["centerline_position"], current_vessel[index]["centerline_position"]]
+            y = [current_vessel[index-1]["reference_signal"], current_vessel[index]["reference_signal"]]
+            reference_value = np.interp(displacement, x, y)
+            return reference_value
 
     def save_map(self, absolut_path: str, filename: str):
         map_storage_format = {"vessels": self.vessels, "mappings": self.mappings}

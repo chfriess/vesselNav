@@ -18,11 +18,9 @@ class RandomParticleInjector3D(InjectionStrategy):
                                                           number_to_remove=number_injected_particles)
         for index in range(number_injected_particles):
             vessel_index = random.randint(0, len(self.map3D.get_vessels()))
+            # TODO: adapt to new vessel data structure
             position = random.uniform(0, len(self.map3D.get_vessel(vessel_index)))
             state = State3D(position=position, branch=vessel_index, alpha=2)
             particle = Particle(state=state)
             particles.append(particle=particle)
         return particles
-
-# TODO 3D: 3D cluster position estimate, 3D model, generate 3D cluster position estimate
-# TODO 3D: 3D post hoc estimator, 3D online estimator

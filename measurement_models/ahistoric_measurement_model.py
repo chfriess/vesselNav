@@ -13,6 +13,7 @@ class AhistoricMeasurementModel3D(MeasurementStrategy):
     def get_reference(self):
         return self.map3D
 
+    # TODO: adapt to new vessel data structure
     def retrieve_signal_prediction(self, particle: Particle) -> float:
         position = round(particle.get_state().get_position()["displacement"])
 
