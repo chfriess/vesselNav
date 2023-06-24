@@ -52,6 +52,16 @@ class Map3D:
                                                                 reference_values=reference_values,
                                                                 index=index)
 
+    def add_vessel_from_json(self, absolute_path: str, index: int):
+        self.check_right_vessel_format(index)
+        if absolute_path.endswith('.json'):
+            with open(absolute_path, "r") as infile:
+                vessel_to_read = json.load(infile)
+                vessel = vessel_to_read["signal_per_centerline_position"]
+                self.vessels[index] = vessel
+        else:
+            raise ValueError("File must be of type .json")
+
     def add_mapping(self, mapping: list):
         if not all(isinstance(x, int) for x in mapping):
             raise ValueError("The mapping must consist of integer values")
@@ -88,7 +98,6 @@ class Map3D:
             return []
         return successor_indices
 
-    # TODO test this fuction
     def get_reference_value(self, branch: int, displacement: float) -> float:
         if branch not in self.vessels.keys():
             raise ValueError("No vessel branch with index " + str(branch) + " in the map")
@@ -135,5 +144,3 @@ class Map3D:
         keys = [key for key in self.vessels.keys()]
         for key in keys:
             self.vessels[int(key)] = self.vessels.pop(key)
-
-    # TODO: load vessel only directly from json

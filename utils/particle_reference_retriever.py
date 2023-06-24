@@ -1,7 +1,7 @@
 from utils.map3D import Map3D
 
 
-# TODO: adapt to new reference data structure, and also write new Retriever with easier concept
+# TODO: adapt to new reference data structure => what should you do with the last reference index stuff?
 
 
 class ParticleReferenceRetriever:
@@ -14,7 +14,6 @@ class ParticleReferenceRetriever:
 
 
 class CroppingParticleReferenceRetriever:
-
 
     def retrieve_reference_update(self, particle, map3D: Map3D) -> list:
         current_branch = particle.get_state().get_position()["branch"]
@@ -84,8 +83,8 @@ class CroppingParticleReferenceRetriever:
             map3D: Map3D,
             last_displacement_index: int):
         particle.set_last_reference_index(branch_index=current_branch, displacement_index=0)
-        # TODO: adapt to new reference data structure
-        reference_update = map3D.get_vessel(current_branch)[0:last_displacement_index][::-1]
+        reference_update = [el["reference_signal"] for el in
+                            map3D.get_vessel(current_branch)[0:last_displacement_index][::-1]]
         return reference_update
 
     @staticmethod
@@ -96,8 +95,7 @@ class CroppingParticleReferenceRetriever:
             last_displacement_index: int):
         particle.set_last_reference_index(branch_index=current_branch,
                                           displacement_index=len(map3D.get_vessel(current_branch)) - 1)
-        # TODO: adapt to new reference data structure
-        reference_update = map3D.get_vessel(current_branch)[last_displacement_index:]
+        reference_update = [el["reference_signal"] for el in map3D.get_vessel(current_branch)[last_displacement_index:]]
         return reference_update
 
     @staticmethod
@@ -107,10 +105,9 @@ class CroppingParticleReferenceRetriever:
                                                         last_displacement_index: int):
         reference_update = []
         for index in range(last_displacement_index, current_displacement + 1):
-            # TODO: adapt to new reference data structure
-            if index < len(map3D.get_vessel(current_branch)):
-                # TODO: adapt to new reference data structure
+            if index < map3D.get_vessel(current_branch)[-1]["centerline_position"]:
                 reference_update.append(map3D.get_vessel(current_branch)[index])
+                reference_update.append(map3D.get_reference_value(current_branch, index))
         return reference_update
 
     @staticmethod

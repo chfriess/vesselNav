@@ -1,6 +1,4 @@
 from numpy import random
-
-from particles.particle import Particle
 from strategies.motion_strategy import MotionStrategy
 from utils.map3D import Map3D
 from utils.particle_set import ParticleSet
