@@ -34,6 +34,9 @@ class SlidingDTWMeasurementModel3D(MeasurementStrategy):
 
 class SlidingDerivativeDTWMeasurementModel3D(SlidingDTWMeasurementModel3D):
 
+    def __init__(self, map3D: Map3D):
+        super().__init__(map3D)
+
     @staticmethod
     def smooth_exponentially(data: list,
                              alpha: float = 0.5) -> list:
@@ -71,6 +74,9 @@ class SlidingDerivativeDTWMeasurementModel3D(SlidingDTWMeasurementModel3D):
 
 
 class SlidingCombinedDerivativeDTWMeasurementModel3D(SlidingDerivativeDTWMeasurementModel3D):
+
+    def __init__(self, map3D: Map3D):
+        super().__init__(map3D)
 
     def convex_combine_derived_and_raw_series(self, series: list) -> list:
         alpha = 0.5

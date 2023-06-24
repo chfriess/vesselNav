@@ -31,7 +31,7 @@ class Map3D:
         if len(self.vessels) > 0 and max(list(self.vessels.keys())) == index:
             raise ValueError("Vessels with index: "
                              + str(max(list(self.vessels.keys()))) + str(" was already added"))
-        if len(self.vessels) > 0 and max(list(self.vessels.keys())) != index-1:
+        if len(self.vessels) > 0 and max(list(self.vessels.keys())) != index - 1:
             raise ValueError("Vessels must be added in ascending order; last added index was: "
                              + str(max(list(self.vessels.keys()))))
 
@@ -72,7 +72,9 @@ class Map3D:
         for mapping in self.mappings:
             if mapping[1] == index:
                 return mapping[0]
-        return -1
+
+        # base vessel is its own predecessor
+        return 0
 
     def get_indices_of_successors(self, index: int) -> list:
         successor_indices = []

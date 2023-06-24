@@ -1,4 +1,5 @@
 import json
+import math
 import time
 from statistics import mean
 import numpy as np
@@ -7,6 +8,15 @@ import logging
 from scipy.stats import sem
 from navigators.vessel_navigator import VesselNavigator
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
+
+
+def rms(signal_one: list, signal_two: list) -> float:
+    if len(signal_one) != len(signal_two):
+        raise ValueError("signal and groundtruth must be of same length for rms calculation")
+    acc = 0
+    for i in range(len(signal_two)):
+        acc += math.pow((signal_one[i] - signal_two[i]), 2)
+    return math.sqrt(acc / len(signal_two))
 
 
 def posthoc_run_3D_vessel_navigator(ref_path: str,
@@ -39,7 +49,7 @@ def posthoc_run_3D_vessel_navigator(ref_path: str,
 
     impedance = np.load(imp_path)
     displacements = np.load(displace_path)
-    grtruth = np.load(grtruth_path)
+    groundtruth = np.load(grtruth_path)
 
     positions = {}
     particles_per_step = {}
@@ -87,11 +97,14 @@ def posthoc_run_3D_vessel_navigator(ref_path: str,
     with open(dest_path + "positions.json", "w") as outfile2:
         outfile2.write(jo2)
 
-    # jo3 = json.dumps(clusters_per_step, indent=4)
+    """
+    TODO: make Position3D Json serializable
+    jo3 = json.dumps(clusters_per_step, indent=4)
 
     # save all clusters
-    # with open(dest_path + "clusters.json", "w") as outfile3:
-    # outfile3.write(jo3)
+    with open(dest_path + "clusters.json", "w") as outfile3:
+        outfile3.write(jo3)
+    """
 
     np.save(dest_path + "best cluster means", np.array(posest))
     np.save(dest_path + "best cluster variances", np.array(err))
@@ -101,14 +114,36 @@ def posthoc_run_3D_vessel_navigator(ref_path: str,
 
     np.save(dest_path + "alpha estimates", np.array(alpha_estimates))
 
-    acc = []
+    acc = [0]
+    cumulative_position_estimate = [groundtruth[0]]
+    cumulative_displacements = [groundtruth[0]]
+    cumulative_alpha_displacements = [groundtruth[0]]
     for index in range(len(positions)):
-        acc.append(positions[index][0] - grtruth[1:][index])
+        acc.append(positions[index][0] - groundtruth[index])
+        cumulative_position_estimate.append(positions[index][0])
+        cumulative_displacements.append(cumulative_displacements[index] + displacements[index])
+        cumulative_alpha_displacements.append(cumulative_alpha_displacements[index]
+                                              + (alpha_center * displacements[index]))
+
+    with open(dest_path + filename + "_rms.txt", 'w') as f:
+        f.write("The rms value of the deviation of the best position estimate from the groundtruth is: \n")
+        f.write(str(rms(signal_one=cumulative_position_estimate, signal_two=list(groundtruth))))
+        f.write("\n\n")
+        f.write("The rms value of the deviation of the displacement from the groundtruth is: \n")
+        f.write(str(rms(signal_one=cumulative_displacements, signal_two=list(groundtruth))))
+        cumulative_displacements_transformed = [groundtruth[0]]
+        for i in range(len(displacements)):
+            cumulative_displacements_transformed.append(
+                displacements[i] * alpha_center + cumulative_displacements_transformed[i])
+        f.write("\n\n")
+        f.write(
+            "The rms value of the deviation of the displacement multiplied with alpha from the groundtruth is: \n")
+        f.write(str(rms(signal_one=cumulative_alpha_displacements, signal_two=list(groundtruth))))
 
     np.save(dest_path + "pf estimate errors from groundtruth", np.array(acc))
 
     logging.info(
-        "final difference estimate vs. groundtruth = " + str(grtruth[-1] - posest[-1]))
+        "final difference estimate vs. groundtruth = " + str(groundtruth[-1] - posest[-1]))
     logging.info("Mean absolute deviation of PF estimate from groundtruth in mm = " + str(mean(acc)))
     logging.info("Sem of Mean absolute deviation of PF estimate from groundtruth in mm = " + str(sem(acc)))
     logging.info("Mean particle dispersion at each time step as sem of dominant cluster = " + str(sem(err)))
@@ -158,21 +193,38 @@ def evaluate_performance(ref_path: str,
 
 
 if __name__ == "__main__":
-    sample_nr = "20"
-    reference_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\" + "reference_from_iliaca.npy"
-    impedance_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
-                     + "\\data_sample_" + sample_nr + "\\impedance_from_iliaca.npy"
-    groundtruth_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr + \
-                       "\\data_sample_" + sample_nr + "\\groundtruth_from_iliaca.npy"
-    displacement_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
-                        + "\\data_sample_" + sample_nr + "\\displacements_from_iliaca.npy"
-    destination_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\"
-    groundtruth = np.load(groundtruth_path)
-    posthoc_run_3D_vessel_navigator(ref_path=reference_path,
-                                    imp_path=impedance_path,
-                                    grtruth_path=groundtruth_path,
-                                    displace_path=displacement_path,
-                                    dest_path=destination_path,
-                                    filename="test",
-                                    initial_position_center=groundtruth[0],
-                                    initial_branch=0)
+    SAMPLES = ["20", "25", "27", "29", "30", "31", "34", "35"]
+    PATH = "C:\\Users\\Chris\\OneDrive\\Desktop\\test\\"
+
+
+    for sample_nr in SAMPLES:
+        for measurement_model in MeasurementType:
+            reference_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\" + "reference_from_iliaca.npy"
+            impedance_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
+                             + "\\data_sample_" + sample_nr + "\\impedance_from_iliaca.npy"
+            groundtruth_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr + \
+                               "\\data_sample_" + sample_nr + "\\groundtruth_from_iliaca.npy"
+            displacement_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
+                                + "\\data_sample_" + sample_nr + "\\displacements_from_iliaca.npy"
+            destination_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\test\\sample_" + sample_nr + "\\" + str(
+                measurement_model.name) + "\\"
+            groundtruth = np.load(groundtruth_path)
+            posthoc_run_3D_vessel_navigator(ref_path=reference_path,
+                                            imp_path=impedance_path,
+                                            grtruth_path=groundtruth_path,
+                                            displace_path=displacement_path,
+                                            dest_path=destination_path,
+                                            measurement_type=measurement_model,
+                                            filename=sample_nr,
+                                            alpha_center=2,
+                                            initial_position_center=groundtruth[0],
+                                            initial_branch=0)
+            print("Finished for " + sample_nr + " run of " + str(measurement_model.name))
+
+    exec(open("C:\\Users\\Chris\\PycharmProjects\\data_analysis_scripts_BA\\plot_result_figures.py").read(),
+         {"SAMPLES": SAMPLES, "PATH": PATH})
+    exec(open("C:\\Users\\Chris\\PycharmProjects\\data_analysis_scripts_BA\\prepare_for_statistics.py").read(),
+         {"SAMPLES": SAMPLES, "PATH": PATH})
+
+    exec(open("C:\\Users\\Chris\\PycharmProjects\\data_analysis_scripts_BA\\statistical_evaluation.py").read(),
+         {"SAMPLES": SAMPLES, "PATH": PATH})

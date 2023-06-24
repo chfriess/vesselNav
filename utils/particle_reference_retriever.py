@@ -28,7 +28,6 @@ class ParticleReferenceRetriever3D:
                                                                    last_displacement_index=last_displacement_index)
         # forward motion in same branch
         elif last_displacement_index <= current_displacement and last_branch_index == current_branch:
-
             reference_update = self. \
                 get_reference_update_forward_motion_same_branch(current_displacement=current_displacement,
                                                                 current_branch=current_branch,
@@ -93,7 +92,7 @@ class ParticleReferenceRetriever3D:
                                                         map3D: Map3D,
                                                         last_displacement_index: int):
         reference_update = []
-        for index in range(last_displacement_index + 1, current_displacement + 1):
+        for index in range(last_displacement_index, current_displacement + 1):
             if index < len(map3D.get_vessel(current_branch)):
                 reference_update.append(map3D.get_vessel(current_branch)[index])
         return reference_update
@@ -124,7 +123,7 @@ class ParticleReferenceRetriever3D:
                                                          map3D: Map3D,
                                                          last_displacement_index: int):
         reference_update = []
-        for index in range(last_displacement_index - 1, current_displacement - 1, -1):
+        for index in range(last_displacement_index, current_displacement - 1, -1):
             if 0 <= index:
                 reference_update.append(map3D.get_vessel(current_branch)[index])
         return reference_update

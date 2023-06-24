@@ -3,8 +3,10 @@ from filter.particle_filter import ParticleFilter
 from injectors.alpha_variance_injector import AlphaVariationInjector
 from injectors.random_particle_injector import RandomParticleInjector3D
 from measurement_models.ahistoric_measurement_model import AhistoricMeasurementModel3D
+from measurement_models.sliding_dtw_measurement_model import SlidingCombinedDerivativeDTWMeasurementModel3D, \
+    SlidingDerivativeDTWMeasurementModel3D, SlidingDTWMeasurementModel3D
 from motion_models.motion_model import MotionModel3D
-from particles.particle import Particle3D
+from particles.particle import Particle3D, SlidingParticle3D
 from particles.state import State3D
 from resamplers.low_variance_resampler import LowVarianceResampler
 from utils.map3D import Map3D
@@ -15,6 +17,10 @@ from utils.position_estimate import PositionEstimate, ClusterPositionEstimate3D
 from scipy.stats import sem
 from statistics import mean
 import logging
+
+
+class SlidingCombinedDTWMeasurementModel3D:
+    pass
 
 
 class Model3D(ModelInterface):
@@ -37,8 +43,11 @@ class Model3D(ModelInterface):
         if measurement_model == MeasurementType.AHISTORIC:
             measurement_strategy = AhistoricMeasurementModel3D(map3D=map3D)
             logging.info("measurement model: ahistoric")
+        elif measurement_model == MeasurementType.SLIDING_DTW:
+            measurement_strategy = SlidingCombinedDerivativeDTWMeasurementModel3D(map3D=map3D)
+            logging.info("measurement model: sliding_dtw")
         else:
-            raise ValueError("Select a valid measurement strategy: ahistoric ")
+            raise ValueError("Select a valid measurement strategy: ahistoric or sliding dtw")
         motion_model = MotionModel3D(map3D=map3D)
         resampling_strategy = LowVarianceResampler()
         self.particle_filter = ParticleFilter(motion_model=motion_model,
@@ -65,6 +74,14 @@ class Model3D(ModelInterface):
                 state.assign_random_position(center=initial_position_center, variance=initial_position_variance)
                 state.assign_random_alpha(center=alpha_center, variance=alpha_variance)
                 particle = Particle3D(state=state, weight=0)
+                self.particles.append(particle)
+        elif isinstance(self.particle_filter.measurement_strategy, SlidingDTWMeasurementModel3D):
+            for _ in range(number_of_particles):
+                state = State3D()
+                state.set_branch(initial_branch)
+                state.assign_random_position(center=initial_position_center, variance=initial_position_variance)
+                state.assign_random_alpha(center=alpha_center, variance=alpha_variance)
+                particle = SlidingParticle3D(state=state, weight=0)
                 self.particles.append(particle)
 
     def estimate_current_position(self) -> PositionEstimate:
