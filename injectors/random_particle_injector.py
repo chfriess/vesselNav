@@ -18,8 +18,7 @@ class RandomParticleInjector3D(InjectionStrategy):
                                                           number_to_remove=number_injected_particles)
         for index in range(number_injected_particles):
             vessel_index = random.randint(0, len(self.map3D.get_vessels()))
-            # TODO: adapt to new vessel data structure
-            position = random.uniform(0, len(self.map3D.get_vessel(vessel_index)))
+            position = random.uniform(0, self.map3D.get_vessel(vessel_index)[-1]["centerline_position"])
             state = State3D(position=position, branch=vessel_index, alpha=2)
             particle = Particle(state=state)
             particles.append(particle=particle)
