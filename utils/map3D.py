@@ -88,6 +88,7 @@ class Map3D:
             return []
         return successor_indices
 
+    # TODO test this fuction
     def get_reference_value(self, branch: int, displacement: float) -> float:
         if branch not in self.vessels.keys():
             raise ValueError("No vessel branch with index " + str(branch) + " in the map")
@@ -134,3 +135,5 @@ class Map3D:
         keys = [key for key in self.vessels.keys()]
         for key in keys:
             self.vessels[int(key)] = self.vessels.pop(key)
+
+    # TODO: load vessel only directly from json

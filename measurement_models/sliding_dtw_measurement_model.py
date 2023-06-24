@@ -2,7 +2,7 @@ import numpy as np
 from tslearn.metrics import dtw
 from strategies.measurement_strategy import MeasurementStrategy
 from utils.map3D import Map3D
-from utils.particle_reference_retriever import ParticleReferenceRetriever3D
+from utils.particle_reference_retriever import ParticleReferenceRetriever
 from utils.particle_set import ParticleSet
 
 
@@ -10,8 +10,7 @@ class SlidingDTWMeasurementModel3D(MeasurementStrategy):
     def __init__(self, map3D: Map3D):
         self.map3D = map3D
         self.measurement_history = []
-        # TODO: adapt to new vessel data structure
-        self.particle_reference_retriever = ParticleReferenceRetriever3D()
+        self.particle_reference_retriever = ParticleReferenceRetriever()
 
     def get_reference(self):
         return self.map3D
@@ -25,7 +24,6 @@ class SlidingDTWMeasurementModel3D(MeasurementStrategy):
             self.measurement_history = self.measurement_history[-20:]
 
         for particle in particles:
-            # TODO: adapt to new vessel data structure
             particle.reference_history += self.particle_reference_retriever.retrieve_reference_update(
                 particle, self.map3D)
             if len(particle.reference_history) > 20:

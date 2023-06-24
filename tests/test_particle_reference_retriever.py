@@ -3,7 +3,7 @@ from unittest import TestCase
 from particles.particle import SlidingParticle3D
 from particles.state import State3D
 from utils.map3D import Map3D
-from utils.particle_reference_retriever import ParticleReferenceRetriever3D
+from utils.particle_reference_retriever import CroppingParticleReferenceRetriever
 
 
 class TestParticleReferenceRetriever3D(TestCase):
@@ -31,7 +31,7 @@ class TestParticleReferenceRetriever3D(TestCase):
         map3D.add_mapping([1, 4])
         map3D.add_mapping([1, 5])
 
-        retriever = ParticleReferenceRetriever3D()
+        retriever = CroppingParticleReferenceRetriever()
         p = SlidingParticle3D(State3D(position=65, branch=0))
         p.state.set_position(110)
         p.state.branch = 4

@@ -3,7 +3,17 @@ from utils.map3D import Map3D
 
 # TODO: adapt to new reference data structure, and also write new Retriever with easier concept
 
-class ParticleReferenceRetriever3D:
+
+class ParticleReferenceRetriever:
+    @staticmethod
+    def retrieve_reference_update(particle, map3D: Map3D) -> list:
+        local_reference_value = map3D.get_reference_value(
+            branch=particle.get_state().get_position()["branch"],
+            displacement=particle.get_state().get_position()["displacement"])
+        return [local_reference_value]
+
+
+class CroppingParticleReferenceRetriever:
 
 
     def retrieve_reference_update(self, particle, map3D: Map3D) -> list:

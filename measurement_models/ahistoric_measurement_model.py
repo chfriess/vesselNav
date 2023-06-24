@@ -13,16 +13,11 @@ class AhistoricMeasurementModel3D(MeasurementStrategy):
     def get_reference(self):
         return self.map3D
 
-    # TODO: adapt to new vessel data structure
     def retrieve_signal_prediction(self, particle: Particle) -> float:
-        position = round(particle.get_state().get_position()["displacement"])
-
-        if position < 0:
-            return self.map3D.get_vessel(particle.get_state().get_position()["branch"])[0]
-        elif position > len(self.map3D.get_vessel(particle.get_state().get_position()["branch"])) - 1:
-            return self.map3D.get_vessel(particle.get_state().get_position()["branch"])[-1]
-        else:
-            return self.map3D.get_vessel(particle.get_state().get_position()["branch"])[position]
+        local_reference_value = self.map3D.get_reference_value(
+            branch=particle.get_state().get_position()["branch"],
+            displacement=particle.get_state().get_position()["displacement"])
+        return local_reference_value
 
     def raw_weight_particles(self, particles: ParticleSet, measurement: float) -> ParticleSet:
         for particle in particles:
