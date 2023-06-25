@@ -130,8 +130,13 @@ class Map3D:
         if absolute_path.endswith('.json'):
             with open(absolute_path, "r") as infile:
                 map_to_read = json.load(infile)
-                self.vessels = map_to_read["vessels"]
-                self.mappings = map_to_read["mappings"]
+                if 'vessels' and 'mappings' in map_to_read.keys():
+                    self.vessels = map_to_read["vessels"]
+                    self.mappings = map_to_read["mappings"]
+                elif 'signal_per_centerline_position' in map_to_read.keys():
+                    self.add_vessel_from_json(absolute_path=absolute_path, index=0)
+                else:
+                    raise ValueError("json map not in the right format")
         elif absolute_path.endswith('.npy'):
             centerline = np.load(absolute_path)
             self.add_vessel_impedance_prediction_as_millimeter_list(list(centerline), 0)
@@ -144,3 +149,12 @@ class Map3D:
         keys = [key for key in self.vessels.keys()]
         for key in keys:
             self.vessels[int(key)] = self.vessels.pop(key)
+
+
+
+if __name__ == "__main__":
+    m = Map3D()
+    #m.add_vessel_from_json("C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\smoothed_simulated_reference_agar.json", 0)
+    #m.save_map("C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\", "smoothed_map_agar")
+    m.load_map("C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\simulated_reference_agar.json")
+    print(m)

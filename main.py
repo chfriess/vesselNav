@@ -193,13 +193,15 @@ def evaluate_performance(ref_path: str,
 
 
 if __name__ == "__main__":
-    SAMPLES = ["20", "25", "27", "29", "30", "31", "34", "35"]
+    #SAMPLES = ["20", "25", "27", "29", "30", "31", "34", "35"]
+    SAMPLES = ["20"]
     PATH = "C:\\Users\\Chris\\OneDrive\\Desktop\\test\\"
 
 
     for sample_nr in SAMPLES:
         for measurement_model in MeasurementType:
-            reference_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\" + "reference_from_iliaca.npy"
+
+            reference_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\" + "smoothed_simulated_reference_agar.json"
             impedance_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
                              + "\\data_sample_" + sample_nr + "\\impedance_from_iliaca.npy"
             groundtruth_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr + \
@@ -208,6 +210,18 @@ if __name__ == "__main__":
                                 + "\\data_sample_" + sample_nr + "\\displacements_from_iliaca.npy"
             destination_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\test\\sample_" + sample_nr + "\\" + str(
                 measurement_model.name) + "\\"
+            """
+            reference_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\map_plastic.json"
+            impedance_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
+                             + "\\data_sample_" + sample_nr + "\\impedance_from_iliaca.npy"
+            groundtruth_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr + \
+                               "\\data_sample_" + sample_nr + "\\groundtruth_from_iliaca.npy"
+            displacement_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
+                                + "\\data_sample_" + sample_nr + "\\displacements_from_iliaca.npy"
+            destination_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\test_plastic\\sample_" + sample_nr + "\\" + str(
+                measurement_model.name) + "\\"
+            """
+
             groundtruth = np.load(groundtruth_path)
             posthoc_run_3D_vessel_navigator(ref_path=reference_path,
                                             imp_path=impedance_path,
@@ -221,10 +235,16 @@ if __name__ == "__main__":
                                             initial_branch=0)
             print("Finished for " + sample_nr + " run of " + str(measurement_model.name))
 
-    exec(open("C:\\Users\\Chris\\PycharmProjects\\data_analysis_scripts_BA\\plot_result_figures.py").read(),
-         {"SAMPLES": SAMPLES, "PATH": PATH})
+            exec(open("C:\\Users\\Chris\\PycharmProjects\\data_analysis_scripts_BA\\plot_result_figures.py").read(),
+                 {"REF_PATH": reference_path, "IMP_PATH": impedance_path,
+                  "GRTRUTH_PATH": groundtruth_path, "BASE_PATH": destination_path})
+    """
     exec(open("C:\\Users\\Chris\\PycharmProjects\\data_analysis_scripts_BA\\prepare_for_statistics.py").read(),
          {"SAMPLES": SAMPLES, "PATH": PATH})
 
     exec(open("C:\\Users\\Chris\\PycharmProjects\\data_analysis_scripts_BA\\statistical_evaluation.py").read(),
          {"SAMPLES": SAMPLES, "PATH": PATH})
+    """
+
+
+
