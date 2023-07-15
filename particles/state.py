@@ -34,6 +34,9 @@ class State:
     def set_position(self, position: float):
         self.position = position
 
+    def set_alpha(self, alpha: float):
+        self.alpha = alpha
+
 
 class State3D(State):
 

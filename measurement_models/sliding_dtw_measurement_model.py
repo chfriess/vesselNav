@@ -1,5 +1,6 @@
 import numpy as np
 from tslearn.metrics import dtw
+
 from strategies.measurement_strategy import MeasurementStrategy
 from utils.map3D import Map3D
 from utils.particle_reference_retriever import ParticleReferenceRetriever
@@ -17,6 +18,10 @@ class SlidingDTWMeasurementModel3D(MeasurementStrategy):
 
     def reset_measurement_history(self):
         self.measurement_history = []
+
+    @staticmethod
+    def retrieve_signal_prediction(particle):
+        return particle.reference_history
 
     def raw_weight_particles(self, particles: ParticleSet, measurement: float) -> ParticleSet:
         self.measurement_history.append(measurement)
@@ -79,13 +84,14 @@ class SlidingCombinedDerivativeDTWMeasurementModel3D(SlidingDerivativeDTWMeasure
         super().__init__(map3D)
 
     def convex_combine_derived_and_raw_series(self, series: list) -> list:
-        alpha = 0.5
+        alpha = 0.2
         if len(series) < 3:
             return series
         series_np = np.array(series)
         derivative = self.derive_series(series)
         combination = alpha * series_np[2:] + (1 - alpha) * np.array(derivative)
         return list(combination)
+
 
     def raw_weight_particles(self, particles: ParticleSet, measurement: float) -> ParticleSet:
         self.measurement_history.append(measurement)

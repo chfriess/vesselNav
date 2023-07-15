@@ -1,3 +1,5 @@
+from abc import abstractmethod
+
 from particles.state import State, State3D
 
 
@@ -33,8 +35,18 @@ class Particle:
     def set_weight(self, weight: float):
         self.weight = weight
 
+    def set_alpha(self, alpha: float):
+        self.state.set_alpha(alpha)
+
+    @abstractmethod
+    def reset_particle(self):
+        raise NotImplementedError
+
 
 class Particle3D(Particle):
+    def reset_particle(self):
+        pass
+
     def __init__(self,
                  state: State3D,
                  weight: float = 0):
@@ -68,3 +80,6 @@ class SlidingParticle3D(Particle3D):
     def set_last_reference_index(self, branch_index: int, displacement_index: int):
         self.last_reference_index["branch_index"] = branch_index
         self.last_reference_index["displacement_index"] = displacement_index
+
+    def reset_particle(self):
+        self.reference_history = []

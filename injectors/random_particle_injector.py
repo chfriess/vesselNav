@@ -1,7 +1,7 @@
 from numpy import random
 from particles.state import State3D
 from strategies.injection_strategy import InjectionStrategy
-from particles.particle import Particle
+from particles.particle import Particle3D, SlidingParticle3D
 from utils.map3D import Map3D
 from utils.particle_set import ParticleSet
 
@@ -13,13 +13,18 @@ class RandomParticleInjector3D(InjectionStrategy):
 
     def inject(self,
                particles: ParticleSet) -> ParticleSet:
-        number_injected_particles = int(len(particles) * 0.05)
-        particles = self.remove_number_of_worst_particles(particles=particles,
-                                                          number_to_remove=number_injected_particles)
+        number_injected_particles = int(len(particles) * 0.01)
+        number_alpha_varied_particles = int(len(particles) * 0.04)
+        particles.sort_ascending_by_weight()
+
         for index in range(number_injected_particles):
+            particles[index].reset_particle()
             vessel_index = random.randint(0, len(self.map3D.get_vessels()))
             position = random.uniform(0, self.map3D.get_vessel(vessel_index)[-1]["centerline_position"])
-            state = State3D(position=position, branch=vessel_index, alpha=2)
-            particle = Particle(state=state)
-            particles.append(particle=particle)
+            particles[index].state.position = position
+            particles[index].state.branch = vessel_index
+            particles[index].set_alpha(random.normal(loc=particles[index].state.alpha, scale=0.1))
+
+        for index in range(number_injected_particles, number_alpha_varied_particles):
+            particles[index].state.alpha = random.normal(loc=particles[index].state.alpha, scale=0.1)
         return particles

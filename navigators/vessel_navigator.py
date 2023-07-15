@@ -42,7 +42,8 @@ class VesselNavigator(Navigator):
                         initial_position_center: float = 0,
                         initial_position_variance: float = 0.5,
                         alpha_center: float = 1.5,
-                        alpha_variance: float = 0.1
+                        alpha_variance: float = 0.1,
+                        loglevel=logging.INFO
                         ):
         self.model = Model3D()
         self.model.setup_particle_filter(map_path=reference_path,
@@ -56,7 +57,7 @@ class VesselNavigator(Navigator):
                                    alpha_variance=alpha_variance,
                                    initial_branch=initial_branch
                                    )
-        self.model.setup_logger(loglevel=logging.INFO,
+        self.model.setup_logger(loglevel=loglevel,
                                 log_directory=log_destination_path,
                                 filename=filename + "_log")
 
