@@ -89,7 +89,8 @@ class ModelInterface:
             displacement_measurement=displacement,
             impedance_measurement=impedance)
         for particle in self.particles:
-            logging.debug("UpdatedParticle: " + str(particle) + " | signal prediction | "+ str(self.particle_filter.measurement_strategy.retrieve_signal_prediction(particle)))
+            logging.debug("UpdatedParticle: " + str(particle) + " | signal prediction | "
+                          + str(self.particle_filter.measurement_strategy.retrieve_signal_prediction(particle)))
         logging.info("Number of Particles: " + str(len(self.particles)))
         self.update_steps += 1
 
