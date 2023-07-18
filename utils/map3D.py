@@ -6,6 +6,8 @@ import numpy as np
 """
 THe map3D class represents a 3D vessel tree as set of centerlines. Each vessel possesses a 
 unique index. The connections between the vessels are encoded by an index structure. 
+If two vessels with index i and j have a connection from i to j, the pair [i,j] represents this
+connection.
 """
 
 
