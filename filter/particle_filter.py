@@ -4,6 +4,13 @@ from strategies.motion_strategy import MotionStrategy
 from strategies.resampling_strategy import ResamplingStrategy
 from utils.particle_set import ParticleSet
 
+"""
+The ParticleFilter class actualizes the particle estimates with the sensor information.
+The filter method expects the previous particle set and a displacement as well as an impedance
+measurement. The filter then applies the motion model and the measurement model to the particles,
+resamples the particles with the specified resampling strategy, and finally injects particles with
+the selected injection strategy.
+"""
 
 class ParticleFilter:
     def __init__(self,
