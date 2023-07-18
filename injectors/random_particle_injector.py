@@ -1,7 +1,5 @@
 from numpy import random
-from particles.state import State3D
 from strategies.injection_strategy import InjectionStrategy
-from particles.particle import Particle3D, SlidingParticle3D
 from utils.map3D import Map3D
 from utils.particle_set import ParticleSet
 
