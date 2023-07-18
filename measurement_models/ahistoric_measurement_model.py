@@ -1,7 +1,6 @@
 import math
 
 from strategies.measurement_strategy import MeasurementStrategy
-from particles.particle import Particle
 from utils.map3D import Map3D
 from utils.particle_set import ParticleSet
 
