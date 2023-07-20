@@ -6,11 +6,13 @@ from utils.particle_set import ParticleSet
 """
 The MotionModel3D takes a set of particles and applies the current displacement measurement.
 The displacement measurement is a distance value. For each particle, this distance value
-is first multiplied by the object variable alpha of the respective particle. Then, the 
+is multiplied by the object variable alpha of the respective particle. Then, the 
 resulting value is used as center of a normal distribution with variance equal to the estimated
 error of the displacement sensor. The new position estimate of the respective particle is then 
-drawn from this normal distribution.
+drawn from this normal distribution. After the position of each particle of the particle set was 
+updated, the particle set is returned.
 """
+
 
 class MotionModel3D(MotionStrategy):
 

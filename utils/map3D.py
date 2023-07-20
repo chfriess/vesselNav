@@ -1,3 +1,4 @@
+import copy
 import json
 import numbers
 
@@ -230,3 +231,39 @@ def prepare_cross_validation_maps():
         for key in m.vessels.keys():
             print(str(key) + "_" + str(m.vessels[key]))
         m.save_map(DESTINATION, "cross_reference_map_" + sample_nr)
+
+
+if __name__ == "__main__":
+    dest = "C:\\Users\\Chris\\OneDrive\\Desktop\\branch_pruning_agar_I\\3D reference\\"
+
+
+
+    aorta_before = np.load(dest + "aorta_before.npy")
+    aorta_after = np.load(dest + "aorta_after.npy")
+    renal_one = np.load(dest + "renal.npy")
+    renal_two = copy.deepcopy(renal_one)
+    iliaca_one = np.load(dest + "iliaca.npy")
+    iliaca_two = copy.deepcopy(iliaca_one)
+
+
+    m = Map3D()
+
+    m.add_vessel_impedance_prediction_as_millimeter_list(reference_values=list(aorta_before), index=0)
+    m.add_vessel_impedance_prediction_as_millimeter_list(reference_values=list(aorta_after), index=1)
+
+    m.add_vessel_impedance_prediction_as_millimeter_list(reference_values=list(renal_one), index=2)
+    m.add_vessel_impedance_prediction_as_millimeter_list(reference_values=list(renal_two), index=3)
+
+    m.add_vessel_impedance_prediction_as_millimeter_list(reference_values=list(iliaca_one), index=4)
+    m.add_vessel_impedance_prediction_as_millimeter_list(reference_values=list(iliaca_two), index=5)
+
+    m.add_mapping([0, 1])
+    m.add_mapping([0, 2])
+    m.add_mapping([0, 3])
+
+    m.add_mapping([1, 4])
+    m.add_mapping([1, 5])
+
+    print(m)
+
+    m.save_map(dest, "agar_I_pruning_map")

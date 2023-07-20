@@ -383,18 +383,9 @@ if __name__ == "__main__":
 
 
 
-    #SAMPLES = ["20", "25", "27", "29", "30", "31", "34", "35"]
+    SAMPLES = ["20", "25", "27", "29", "30", "31", "34", "35"]
 
 
-    #PATH = "C:\\Users\\Chris\\OneDrive\\Desktop\\result_tilt_main_old\\"
-
-    #SAMPLES = [str(x) for x in range(39, 60)]
-    #SAMPLES.remove("43")
-    #SAMPLES = [str(x) for x in range(2, 12)]
-    #SAMPLES.remove("4")
-    #SAMPLES.remove("11")
-    cross_validation()
-    """
     for sample_nr in SAMPLES:
         for measurement_model in MeasurementType:
            
@@ -409,7 +400,7 @@ if __name__ == "__main__":
             destination_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\results_first_agar\\sample_" + sample_nr + "\\" + str(
                 measurement_model.name) + "\\"
 
-          
+            """
             # plastic
             reference_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\reference_normalized.npy"
             impedance_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\coregistration_" + sample_nr \
@@ -436,7 +427,7 @@ if __name__ == "__main__":
             destination_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\result_tilt_main_old\\sample_" + sample_nr + "\\" + str(
                 measurement_model.name) + "\\"
 
-
+            """
             groundtruth = np.load(groundtruth_path)
 
             posthoc_run_3D_vessel_navigator(ref_path=reference_path,
@@ -458,11 +449,11 @@ if __name__ == "__main__":
             exec(open("C:\\Users\\Chris\\PycharmProjects\\data_analysis_scripts_BA\\plot_result_figures.py").read(),
                  {"REF_PATH": reference_path, "IMP_PATH": impedance_path, "GRTRUTH_PATH": groundtruth_path,
                   "BASE_PATH": destination_path, "FILENAME": sample_nr})
-            
+
+    """
     exec(open("C:\\Users\\Chris\\PycharmProjects\\data_analysis_scripts_BA\\prepare_for_statistics.py").read(),
          {"SAMPLES": SAMPLES, "PATH": PATH})
 
     exec(open("C:\\Users\\Chris\\PycharmProjects\\data_analysis_scripts_BA\\statistical_evaluation.py").read(),
          {"SAMPLES": SAMPLES, "PATH": PATH})
-
     """
