@@ -193,7 +193,7 @@ def evaluate_performance():
                 start = time.time()
                 clusters.append(navigator.update_step(displacement=displacements[i], impedance=impedance[i]))
                 end = time.time()
-                acc = end - start
+                acc += (end - start)
             estimates = [x.get_first_cluster_mean() for x in clusters]
             performance[n] = acc / len(displacements)
             estimates = [x for [x, _] in estimates]
@@ -291,7 +291,7 @@ def evaluate_performance_cross_validation():
                     start = time.time()
                     clusters.append(navigator.update_step(displacement=displacements[i], impedance=impedance[i]))
                     end = time.time()
-                    acc = end - start
+                    acc += (end - start)
                 estimates = [x.get_first_cluster_mean() for x in clusters]
                 performance[n] = acc / len(displacements)
                 estimates = [x for [x, _] in estimates]
@@ -383,21 +383,21 @@ if __name__ == "__main__":
 
 
 
-    SAMPLES = ["20", "25", "27", "29", "30", "31", "34", "35"]
+    SAMPLES = ["20", "25", "30", "31", "34"]
 
 
     for sample_nr in SAMPLES:
         for measurement_model in MeasurementType:
            
             #OLD AGAR
-            reference_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\" + "smoothed_standardised_simulated_reference_agar.json"
-            impedance_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
-                             + "\\data_bioelectric_sensors\\impedance_normalized_filtered_" + sample_nr + ".npy"
-            groundtruth_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr + \
-                               "\\data_bioelectric_sensors\\em_interpolated_" + sample_nr + ".npy"
-            displacement_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\phantom_data_testing\\sample_" + sample_nr \
-                                + "\\data_bioelectric_sensors\\displacements_" + sample_nr + ".npy"
-            destination_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\results_first_agar\\sample_" + sample_nr + "\\" + str(
+            reference_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\branch_pruning_agar_I\\3D reference\\" + "agar_I_pruning_map.json"
+            impedance_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\branch_pruning_agar_I\\sample_" + sample_nr \
+                             + "\\data_sample_" + sample_nr + "\\impedance_interpolated_normalized_" + sample_nr + ".npy"
+            groundtruth_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\branch_pruning_agar_I\\sample_" + sample_nr + \
+                               "\\data_sample_" + sample_nr + "\\em_interpolated_" + sample_nr + ".npy"
+            displacement_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\branch_pruning_agar_I\\sample_" + sample_nr \
+                                + "\\data_sample_" + sample_nr + "\\displacements_interpolated_" + sample_nr + ".npy"
+            destination_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\branch_pruning_agar_I\\sample_" + sample_nr + "\\" + str(
                 measurement_model.name) + "\\"
 
             """
@@ -445,11 +445,11 @@ if __name__ == "__main__":
                                             initial_branch=0)
             print("Finished for " + sample_nr + " run of " + str(measurement_model.name))
 
-          
+            """
             exec(open("C:\\Users\\Chris\\PycharmProjects\\data_analysis_scripts_BA\\plot_result_figures.py").read(),
                  {"REF_PATH": reference_path, "IMP_PATH": impedance_path, "GRTRUTH_PATH": groundtruth_path,
                   "BASE_PATH": destination_path, "FILENAME": sample_nr})
-
+            """
     """
     exec(open("C:\\Users\\Chris\\PycharmProjects\\data_analysis_scripts_BA\\prepare_for_statistics.py").read(),
          {"SAMPLES": SAMPLES, "PATH": PATH})
