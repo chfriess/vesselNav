@@ -12,6 +12,7 @@ resamples the particles with the specified resampling strategy, and finally inje
 the selected injection strategy.
 """
 
+
 class ParticleFilter:
     def __init__(self,
                  motion_model: MotionStrategy,
@@ -24,7 +25,7 @@ class ParticleFilter:
         self.injector = injector
 
     def get_reference(self):
-        return self.measurement_strategy.get_reference()  # TODO add Return value and do I even need it?
+        return self.measurement_strategy.get_reference()
 
     def filter(self,
                previous_particle_set: ParticleSet,
