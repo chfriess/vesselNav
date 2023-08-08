@@ -12,25 +12,6 @@ class VesselNavigator(Navigator):
         self.impedance_normalizer = 1
         self.impedance_history = []
 
-    def normalize_impedance(self, impedance: float) -> float:
-        if len(self.impedance_history) <= 10:
-            self.impedance_history.append(impedance)
-            self.impedance_normalizer = sum(self.impedance_history) / len(self.impedance_history)
-        return impedance / self.impedance_normalizer
-
-    @staticmethod
-    def normalize_reference(ref: list) -> list:
-        if len(ref) < 10:
-            normalizer = sum(ref) / len(ref)
-
-        else:
-            normalizer = sum(ref[:10] / 10)
-
-        for i in range(len(ref)):
-            ref[i] = ref[i] / normalizer
-
-        return ref
-
     def setup_navigator(self,
                         reference_path: str,
                         log_destination_path: str,

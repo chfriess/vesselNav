@@ -10,7 +10,6 @@ from utils.particle_filter_component_enums import MeasurementType, InjectorType
 from utils.particle_set import ParticleSet
 
 
-
 class ModelInterface:
     def __init__(self, particle_filter: ParticleFilter = None,
                  particles: ParticleSet = None) -> None:
