@@ -6,6 +6,12 @@ from utils.map3D import Map3D
 from utils.particle_reference_retriever import ParticleReferenceRetriever
 from utils.particle_set import ParticleSet
 
+"""
+The SlidingDTW Measurement model raw weights the particles by comparing the history of the past 20 reference predictions 
+to the history of the past 20 impedance measurements. Each particle stores its own reference history.
+The signal histories are compared by a convex combination of a standard DTW and a derivative DTW algorithm. 
+"""
+
 
 class SlidingDTWMeasurementModel3D(MeasurementStrategy):
     def __init__(self, map3D: Map3D):
@@ -91,7 +97,6 @@ class SlidingCombinedDerivativeDTWMeasurementModel3D(SlidingDerivativeDTWMeasure
         derivative = self.derive_series(series)
         combination = alpha * series_np[2:] + (1 - alpha) * np.array(derivative)
         return list(combination)
-
 
     def raw_weight_particles(self, particles: ParticleSet, measurement: float) -> ParticleSet:
         self.measurement_history.append(measurement)
