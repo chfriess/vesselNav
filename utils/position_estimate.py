@@ -69,7 +69,6 @@ class ClusterPositionEstimate3D(PositionEstimate):
         return best_cluster
 
     def get_second_cluster(self):
-        # TODO: speed up of this temporary hack
         if len(self.clusters) == 0:
             return None
         best_cluster = None
