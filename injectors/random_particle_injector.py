@@ -11,8 +11,7 @@ class RandomParticleInjector3D(InjectionStrategy):
 
     def inject(self,
                particles: ParticleSet) -> ParticleSet:
-        number_injected_particles = int(len(particles) * 0.01)
-        number_alpha_varied_particles = int(len(particles) * 0.04)
+        number_injected_particles = int(len(particles) * 0.05)
         particles.sort_ascending_by_weight()
 
         for index in range(number_injected_particles):
@@ -22,7 +21,4 @@ class RandomParticleInjector3D(InjectionStrategy):
             particles[index].state.position = position
             particles[index].state.branch = vessel_index
             particles[index].set_alpha(random.normal(loc=particles[index].state.alpha, scale=0.1))
-
-        for index in range(number_injected_particles, number_alpha_varied_particles):
-            particles[index].state.alpha = random.normal(loc=particles[index].state.alpha, scale=0.1)
         return particles
