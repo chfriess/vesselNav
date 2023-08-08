@@ -1,4 +1,3 @@
-import copy
 import json
 import numbers
 
@@ -123,8 +122,8 @@ class Map3D:
             index = 0
             while displacement > current_vessel[index]["centerline_position"]:
                 index += 1
-            if not current_vessel[index - 1]["centerline_position"] <= displacement \
-                   <= current_vessel[index]["centerline_position"]:
+            if not current_vessel[index - 1]["centerline_position"] <= \
+                   displacement <= current_vessel[index]["centerline_position"]:
                 raise ValueError("Error in get_reference_value function:"
                                  " displacement could not be located between to adjacent centerline points")
             x = [current_vessel[index - 1]["centerline_position"], current_vessel[index]["centerline_position"]]
@@ -162,108 +161,3 @@ class Map3D:
         keys = [key for key in self.vessels.keys()]
         for key in keys:
             self.vessels[int(key)] = self.vessels.pop(key)
-
-
-def prepare_cross_validation_maps():
-    SAMPLES = ["2", "3", "5", "6", "7", "8", "9", "10"]
-
-    DESTINATION = "C:\\Users\\Chris\\OneDrive\\Desktop\\pruning\\"
-
-    for sample_nr in SAMPLES:
-        m = Map3D()
-        MAIN_PATH = "C:\\Users\\Chris\\OneDrive\\Desktop\\tilt_phantom\\main branch old setup\\sample_" + sample_nr +\
-                    "\\reference_for_cross_validation\\impedance per groundtruth" + sample_nr + ".json"
-        SIDE_PATH = "C:\\Users\\Chris\\OneDrive\\Desktop\\tilt_phantom\\side branch old setup\\sample_" + sample_nr + \
-                    "\\reference_for_cross_validation\\impedance per groundtruth" + sample_nr + ".json"
-
-        with open(MAIN_PATH, "r") as infile:
-            vessel_to_read = json.load(infile)
-            main_vessel = vessel_to_read["signal_per_centerline_position"]
-
-        with open(SIDE_PATH, "r") as infile:
-            vessel_to_read = json.load(infile)
-            side_vessel = vessel_to_read["signal_per_centerline_position"]
-
-        start_index_aorta = 0
-        start_index_side_branch = 0
-
-        for i, el in enumerate(main_vessel):
-            if el["centerline_position"] >= 80:
-                start_index_aorta = i
-                break
-
-        for i, el in enumerate(main_vessel):
-            if el["centerline_position"] >= 180:
-                start_index_side_branch = i
-                break
-
-        aorta_before = main_vessel[start_index_aorta:start_index_side_branch]
-        offset = aorta_before[0]["centerline_position"]
-        for i, el in enumerate(aorta_before):
-            aorta_before[i]["centerline_position"] -= offset
-
-        aorta_after = main_vessel[start_index_side_branch:]
-        offset = aorta_after[0]["centerline_position"]
-        for i, el in enumerate(aorta_after):
-            aorta_after[i]["centerline_position"] -= offset
-
-        m.add_vessel_as_list_of_dicts(main_vessel[:start_index_aorta], 0)
-
-        m.add_vessel_as_list_of_dicts(aorta_before, 1)
-        m.add_vessel_as_list_of_dicts(aorta_after, 2)
-
-        start_index_side_branch = 0
-        for i, el in enumerate(side_vessel):
-            if el["centerline_position"] >= 180:
-                start_index_side_branch = i
-                break
-
-        renal = side_vessel[start_index_side_branch:]
-        offset = renal[0]["centerline_position"]
-        for i, el in enumerate(renal):
-            renal[i]["centerline_position"] -= offset
-        m.add_vessel_as_list_of_dicts(renal, 3)
-
-        m.add_mapping([0, 1])
-        m.add_mapping([1, 2])
-        m.add_mapping([2, 3])
-
-        for key in m.vessels.keys():
-            print(str(key) + "_" + str(m.vessels[key]))
-        m.save_map(DESTINATION, "cross_reference_map_" + sample_nr)
-
-
-if __name__ == "__main__":
-    dest = "C:\\Users\\Chris\\OneDrive\\Desktop\\branch_pruning_agar_I\\3D reference\\"
-
-
-
-    aorta_before = np.load(dest + "aorta_before.npy")
-    aorta_after = np.load(dest + "aorta_after.npy")
-    renal_one = np.load(dest + "renal.npy")
-    renal_two = copy.deepcopy(renal_one)
-    iliaca_one = np.load(dest + "iliaca.npy")
-    iliaca_two = copy.deepcopy(iliaca_one)
-
-
-    m = Map3D()
-
-    m.add_vessel_impedance_prediction_as_millimeter_list(reference_values=list(aorta_before), index=0)
-    m.add_vessel_impedance_prediction_as_millimeter_list(reference_values=list(aorta_after), index=1)
-
-    m.add_vessel_impedance_prediction_as_millimeter_list(reference_values=list(renal_one), index=2)
-    m.add_vessel_impedance_prediction_as_millimeter_list(reference_values=list(renal_two), index=3)
-
-    m.add_vessel_impedance_prediction_as_millimeter_list(reference_values=list(iliaca_one), index=4)
-    m.add_vessel_impedance_prediction_as_millimeter_list(reference_values=list(iliaca_two), index=5)
-
-    m.add_mapping([0, 1])
-    m.add_mapping([0, 2])
-    m.add_mapping([0, 3])
-
-    m.add_mapping([1, 4])
-    m.add_mapping([1, 5])
-
-    print(m)
-
-    m.save_map(dest, "agar_I_pruning_map")
