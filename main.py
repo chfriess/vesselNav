@@ -262,7 +262,7 @@ def evaluate_performance_cross_validation():
             displacement_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\tilt_phantom\\side branch old setup\\sample_" \
                                 + sample_nr + "\\data_bioelectric_sensors\\displacements_" \
                                 + sample_nr + ".npy"
-            destination_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\result_tilt_side_old\\cross_validation\\" + "SLIDING_DTW" + "\\vs_" + ref_nr + "\\"
+            destination_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\result_tilt_side_old\\cross_validation\\" + "AHISTORIC" + "\\vs_" + ref_nr + "\\"
 
             displacements = np.load(displacement_path)
             impedance = np.load(impedance_path)
@@ -380,9 +380,9 @@ def cross_validation():
 
 
 if __name__ == "__main__":
-
-
-
+    """
+    evaluate_performance_cross_validation()
+    """
     SAMPLES = ["20", "25", "30", "31", "34"]
 
 
@@ -399,7 +399,6 @@ if __name__ == "__main__":
                                 + "\\data_sample_" + sample_nr + "\\displacements_interpolated_" + sample_nr + ".npy"
             destination_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\branch_pruning_agar_I\\sample_" + sample_nr + "\\" + str(
                 measurement_model.name) + "\\"
-
             """
             # plastic
             reference_path = "C:\\Users\\Chris\\OneDrive\\Desktop\\plastic coregistration data\\04_06_2023_BS\\reference_normalized.npy"
@@ -449,8 +448,7 @@ if __name__ == "__main__":
             exec(open("C:\\Users\\Chris\\PycharmProjects\\data_analysis_scripts_BA\\plot_result_figures.py").read(),
                  {"REF_PATH": reference_path, "IMP_PATH": impedance_path, "GRTRUTH_PATH": groundtruth_path,
                   "BASE_PATH": destination_path, "FILENAME": sample_nr})
-            """
-    """
+
     exec(open("C:\\Users\\Chris\\PycharmProjects\\data_analysis_scripts_BA\\prepare_for_statistics.py").read(),
          {"SAMPLES": SAMPLES, "PATH": PATH})
 

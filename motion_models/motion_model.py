@@ -33,6 +33,10 @@ class MotionModel3D(MotionStrategy):
         for particle in previous_particle_set:
             position_estimate = particle.get_position()["displacement"] \
                                 + (displacement_measurement * particle.state.alpha)
+
+            # TODO: already draw position estimate randomly
+            position_estimate = random.normal(loc=position_estimate, scale=error)
+
             vessel_length = self.map3D.get_vessel(particle.get_position()["branch"])[-1]["centerline_position"]
             if 0 < position_estimate < vessel_length:
                 particle.state.set_position(random.normal(loc=position_estimate, scale=error))
@@ -57,7 +61,8 @@ class MotionModel3D(MotionStrategy):
                 predecessor_vessel_length = self.map3D.get_vessel(current_index)[-1]["centerline_position"]
                 position_estimate = predecessor_vessel_length + position_estimate
                 current_index = self.map3D.get_index_of_predecessor(current_index)
-        particle.state.set_position(random.normal(loc=position_estimate, scale=error))
+        #particle.state.set_position(random.normal(loc=position_estimate, scale=error))
+        particle.state.set_position(position=position_estimate)
         particle.state.set_branch(current_index)
 
     def handle_forward_vessel_switch(self, particle, position_estimate: float, error: float):
@@ -70,6 +75,7 @@ class MotionModel3D(MotionStrategy):
             position_estimate = position_estimate - current_branch[-1]["centerline_position"]
             successor_indices = self.map3D.get_indices_of_successors(successor_index)
             current_branch = self.map3D.get_vessel(successor_index)
-        particle.state.set_position(random.normal(
-            loc=position_estimate, scale=error))
+
+        #particle.state.set_position(random.normal(loc=position_estimate, scale=error))
+        particle.state.set_position(position=position_estimate)
         particle.state.set_branch(successor_index)
