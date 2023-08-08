@@ -1,11 +1,10 @@
 import logging
 from filter.model3D import Model3D
-from navigators.navigator_interface import Navigator
 from utils.position_estimate import PositionEstimate
 from utils.particle_filter_component_enums import MeasurementType, InjectorType
 
 
-class VesselNavigator(Navigator):
+class VesselNavigator:
 
     def __init__(self, model: Model3D = None):
         self.model = model
@@ -22,7 +21,7 @@ class VesselNavigator(Navigator):
                         initial_branch: int = 0,
                         initial_position_center: float = 0,
                         initial_position_variance: float = 0.5,
-                        alpha_center: float = 1.5,
+                        alpha_center: float = 2.0,
                         alpha_variance: float = 0.1,
                         loglevel=logging.INFO
                         ):
