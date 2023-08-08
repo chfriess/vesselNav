@@ -4,11 +4,11 @@ from strategies.measurement_strategy import MeasurementStrategy
 from utils.map3D import Map3D
 from utils.particle_set import ParticleSet
 
-
 """
 The Ahistoric Measurement Model raw weights of each particle by simply comparing currently measured
 impedance to the reference prediction based on the current position of each particle.
 """
+
 
 class AhistoricMeasurementModel3D(MeasurementStrategy):
 

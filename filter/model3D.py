@@ -3,7 +3,7 @@ from filter.particle_filter import ParticleFilter
 from injectors.alpha_variance_injector import AlphaVariationInjector
 from injectors.random_particle_injector import RandomParticleInjector3D
 from measurement_models.ahistoric_measurement_model import AhistoricMeasurementModel3D
-from measurement_models.sliding_dtw_measurement_model import SlidingCombinedDerivativeDTWMeasurementModel3D,\
+from measurement_models.sliding_dtw_measurement_model import SlidingCombinedDerivativeDTWMeasurementModel3D, \
     SlidingDTWMeasurementModel3D
 from motion_models.motion_model import MotionModel3D
 from particles.particle import Particle3D, SlidingParticle3D
@@ -17,10 +17,6 @@ from utils.position_estimate import PositionEstimate, ClusterPositionEstimate3D
 from scipy.stats import sem
 from statistics import mean
 import logging
-
-
-class SlidingCombinedDTWMeasurementModel3D:
-    pass
 
 
 class Model3D(ModelInterface):
