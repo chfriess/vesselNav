@@ -110,15 +110,30 @@ x_{t}^{[m]} = \begin{pmatrix}
 
 
 ### Weighting Step
+In the weighting step of the particle filter, each particle receives a weight. 
+Therefore, a measurement strategy class calculates the measurement likelihood $p( z_t | x_{t}^{[m]})$,
+which denotes the probability of observing the impedance measurement $z_t$ at time step $t$ if the
+position estimate of the particle $m$ is correct.
 
-ahistoric
+The ahistoric measurement model class determines measurement likelihood according to:
+
 ```math 
 p( z_t | x_{t}^{[m]}) \propto \biggl(\Bigl(z_t - ref_{t}^{[m]}\Bigr)^2\biggr)^{-1}
 ```
+Thereby, the ahistoric measurement model compares the measurement $z_t$ to the reference prediction
+$ref_{t}^{[m]}$ which is predicted based on the position estimate of particle $m$.
 
-sliding_dtw
+The sliding_dtw measurement model class determines measurement likelihood according to:
 ```math 
 p( z_{t} | x_{t-n:t}^{[m]}, z_{t-n:t-1})  \propto \biggl(CW_{\beta}\Bigl(z_{t-n:t}, ref_{t-n:t}^{[m]}\Bigr)\biggr)^{-1}
+```
+Thereby, the sliding_dtw measurement model compares the previous $n$ measurement $z_{t-n:t-1}$ 
+to the previous $n$ reference predictions $ref_{t-n:t}^{[m]}$  which is predicted based on the position estimate 
+of particle $m$. The comparison of measurement and reference history is calculated as convex combination
+of a standard DTW and a derivative DTW algorithm: 
+
+```math 
+CW_\beta(z_{t-n:t-1}, ref_{t-n:t}^{[m]}) = (1-\beta) * DTW(z_{t-n:t-1},ref_{t-n:t}^{[m]}) + \beta * DDTW(z_{t-n:t-1},ref_{t-n:t}^{[m]})
 ```
 
 ### Resampling Step
