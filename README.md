@@ -146,7 +146,7 @@ The injection step randomly varies the state estimates the 5% of particles with 
 
 
 The alpha-variance injector randomly draws a new alpha value from a normal distribution with variance 0.1 centered
-around the old alpha estimate.
+around the old alpha estimate. 
 ```math 
 x_{t}^{[m]} = \begin{pmatrix}
     i_{t}^{m} \\ d_{t}^{[m]}   \\\alpha_{t}^{[m]} \leftarrow  \mathcal{N}(\alpha_{t}^{[m]}, 0.1)
@@ -154,7 +154,8 @@ x_{t}^{[m]} = \begin{pmatrix}
 ```
 
 The alpha-variance injector randomly draws a new alpha value from a normal distribution with variance 0.1 centered
-around the old alpha estimate and draws a random new location in the map.
+around the old alpha estimate and draws a random new location in the map. $I$ denotes the set of centerline indices
+in the vessel centerline map, $l_{i_{t}^{m}}$ denotes the length of the vessel segment with index $i_{t}^{m}$.
 ```math 
 x_{t}^{[m]} = \begin{pmatrix}
     i_{t}^{m} \in_R  I \\ d_{t}^{[m]} \in_R [1,..., l_{i_{t}^{m}}]   \\\alpha_{t}^{[m]} \leftarrow  \mathcal{N}(\alpha_{t}^{[m]}, 0.1)
