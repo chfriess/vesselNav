@@ -20,7 +20,7 @@ particle filter, as long as they implement the correct strategy interface.
 
 ## Particle Filter Concept
 
-The filter combines bioelectric impedance data with data of a displacement sensor. Recorded data of the impedance sensor
+The filter combines bioelectric impedance data [1, 2] with data of a displacement sensor [3]. Recorded data of the impedance sensor
 is a correlate of the cross-sectional area of the vessel. The data of the displacement sensor indicates the velocity
 and the movement direction fo the catheter. The filter combines both sensors into a position estimate. The position 
 estimates are located in a pre-interventionally calculated map of vessel centerlines.
@@ -178,4 +178,17 @@ x_{t}^{[m]} = \begin{pmatrix}
 ```
 
 ## License
+
+## references
+[1] Sutton, Erin E. et al. (2020). “Biologically Inspired Catheter for Endovascular
+Sensing and Navigation.” In: Scientific reports 10.1, p. 5643. DOI: 10.1038/
+s41598-020-62360-w.
+
+[2] Ramadani, Ardit et al. (2022). Bioelectric Registration of Electromagnetic Tracking
+and Preoperative Volume Data. DOI: 10.48550/arXiv.2206.10616
+
+[3] Maier, Heiko, Heribert Schunkert, and Nassir Navab (2023). “Extending bioelectric
+navigation for displacement and direction detection.” In: International
+journal of computer assisted radiology and surgery. DOI: 10.1007/s11548-
+023-02927-w.
 
