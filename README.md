@@ -137,16 +137,24 @@ CW_\beta(z_{t-n:t-1}, ref_{t-n:t}^{[m]}) = (1-\beta) * DTW(z_{t-n:t-1},ref_{t-n:
 ```
 
 ### Resampling Step
+In the resampling step, the particle set is updated by drawing particles with replacement from the previous
+particle set. The weight of the particle is proportional to the probability that a particle is drawn.
+The resampling is performed by a low-variance-resampler.
 
 ### Injection Step
-alpha-variance injector
+The injection step randomly varies the state estimates the 5% of particles with the lowest weight.
+
+
+The alpha-variance injector randomly draws a new alpha value from a normal distribution with variance 0.1 centered
+around the old alpha estimate.
 ```math 
 x_{t}^{[m]} = \begin{pmatrix}
     i_{t}^{m} \\ d_{t}^{[m]}   \\\alpha_{t}^{[m]} \leftarrow  \mathcal{N}(\alpha_{t}^{[m]}, 0.1)
 \end{pmatrix} 
 ```
 
-random particle injector
+The alpha-variance injector randomly draws a new alpha value from a normal distribution with variance 0.1 centered
+around the old alpha estimate and draws a random new location in the map.
 ```math 
 x_{t}^{[m]} = \begin{pmatrix}
     i_{t}^{m} \in_R  I \\ d_{t}^{[m]} \in_R [1,..., l_{i_{t}^{m}}]   \\\alpha_{t}^{[m]} \leftarrow  \mathcal{N}(\alpha_{t}^{[m]}, 0.1)
