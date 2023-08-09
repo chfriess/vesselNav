@@ -62,11 +62,13 @@ beginning of the vessel with index m.
 Each particle contains a state hypothesis that comprises:
 
 
-$$ x_{t}^{[m]} = \begin{pmatrix} i_{t}^{[m]} \\ d_{t}^{[m]} \\ \alpha_{t}^{[m]} \end{pmatrix} $$
+```math 
+x_{t}^{[m]} = \begin{pmatrix} i_{t}^{[m]}, \\ d_{t}^{[m]}, \\ \alpha_{t}^{[m]} \end{pmatrix} 
+```
 
 
 - current branch position in the vessel tree $i_{t}^{[m]}$
-- displacement along the centerline at this branch  $d_{t}^{[m]}$
+- displacement along the centerline at this branch $d_{t}^{[m]}$
 - estimate for the systematic error of the displacement sensing concept $\alpha_{t}^{[m]}$
 
 The sliding particle object is used for the sliding_dtw weighting step of the filter. This particle also stores
@@ -77,6 +79,15 @@ The number of particles used by the filter can be specified when setting up the 
 
 ### Prediction Step
 
+$$
+
+p(x_t|x_{t-1}^{[m]}, u_t) = \mathcal{N}_3(u_t^{[m]} + x_{t-1}^{[m]}, \begin{pmatrix}
+    0 & 0 & 0\\
+    0 & \epsilon(u_t) & 0\\
+    0 & 0 & 0
+\end{pmatrix})
+
+$$
 
 
 ### Weighting Step
