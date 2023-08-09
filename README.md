@@ -59,15 +59,15 @@ beginning of the vessel with index m.
 
 
 ### Particle
-Each particle contains a hypothesis of:
+Each particle contains a state hypothesis that comprises:
 
 
 $$ x_{t}^{[m]} = \begin{pmatrix} i_{t}^{[m]} \\ d_{t}^{[m]} \\ \alpha_{t}^{[m]} \end{pmatrix} $$
 
 
 - current branch position in the vessel tree $i_{t}^{[m]}$
-- displacement along the centerline at this branch
-- estimate for the systematic error of the displacement sensing concept
+- displacement along the centerline at this branch  $d_{t}^{[m]}$
+- estimate for the systematic error of the displacement sensing concept $\alpha_{t}^{[m]}$
 
 The sliding particle object is used for the sliding_dtw weighting step of the filter. This particle also stores
 the recent history of reference predictions of this particle. This reference history is required for the DTW comparison 
