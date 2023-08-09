@@ -63,11 +63,19 @@ beginning of the vessel with index m.
 
 ### Particle
 Each particle contains a hypothesis of:
-- current branch position in the vessel tree
+
+![img.png](particle.png)
+
+
+- current branch position in the vessel tree $i_{t}^{[m]$
 - displacement along the centerline at this branch
 - estimate for the systematic error of the displacement sensing concept
 
-The number of particles used by the filter can be specified when setting up the navigator class
+The sliding particle object is used for the sliding_dtw weighting step of the filter. This particle also stores
+the recent history of reference predictions of this particle. This reference history is required for the DTW comparison 
+to the recent impedance measurement history. 
+
+The number of particles used by the filter can be specified when setting up the navigator class.
 
 ### Prediction Step
 
