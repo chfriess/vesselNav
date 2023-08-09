@@ -84,7 +84,7 @@ estimate for the systematic error of the displacement sensing concept $\alpha_{t
 particle $m$:
 ```math 
 u_t^{[m]} = \begin{pmatrix}
-    0\\ \Delta d_{cath, t} * \alpha_{t}^{[m]} \\0
+    0\\ \Delta d_{cath, t} * \alpha_{t-1}^{[m]} \\0
 \end{pmatrix} 
 ```
 The variable $u_t$ and the measurement noise of the displacement sensing concept $\epsilon(u_t)$ is used
@@ -93,7 +93,7 @@ that distribution. The error is estimated as variance of the previous displaceme
 
 
 ```math 
-p(x_t|x_{t-1}^{[m]}, u_t) = \mathcal{N}_3(u_t^{[m]} + x_{t-1}^{[m]}, \begin{pmatrix}
+\begin{pmatrix} i_{t}^{[m]}\\ d_{t}^{[m]}  \\\alpha_{t}^{[m]} \end{pmatrix} \leftarrow  \mathcal{N}_3(u_t^{[m]} + x_{t-1}^{[m]}, \begin{pmatrix}
     0 & 0 & 0\\
     0 & \epsilon(u_t) & 0\\
     0 & 0 & 0
