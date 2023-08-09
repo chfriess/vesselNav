@@ -11,6 +11,7 @@ A particle filter implementation for localizing a catheter in the vessel tree du
 - The VesselNavigator class acts as interface to using the particle filter.
   - The setup_navigator method allows to specify the parameters of the filter (Number of particles, Measurement Type, Injector type...)
   - The update_step method takes a displacement and impedance measurement value and updates the particle set, and returns an updated position estimate
+  - The filter does not normalize or process the displacement or impedance values. If normalization is necessary, it must be done before feeding the data into the filter
 The filter used a modular concept. Each step of the filter (prediction, weighting, resampling, injection) is performed
 by an individual class that respectively implements the motion strategy, measurement strategy, resampling strategy
 and injection strategy interface. For each of the steps, individual implementations can be passed to the constructor of the
