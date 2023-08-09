@@ -105,7 +105,7 @@ x_{t}^{[m]} = \begin{pmatrix}
 branch switch forward
 ```math 
 x_{t}^{[m]} = \begin{pmatrix}
-    s \in_R  S \\ l_{i_{t-1}^{m}} - d_{t}^{[m]}  \\\alpha_{t}^{[m]} 
+    s \in_R  S \\ l_{i_{t-1}^{m}} - d_{t}^{[m]}  \\\alpha_{t}^{[m]} \end{pmatrix}
 ```
 
 
