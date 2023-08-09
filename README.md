@@ -18,6 +18,10 @@ estimates are located in a pre-interventionally calculated map of vessel centerl
 - The VesselNavigator class acts as interface to using the particle filter.
   - The setup_navigator method allows to specifiy the parameters of the filter (Number of particles, Measurement Type, Injector type...)
   - The update_step method takes a displacement and impedance measurement value and updates the particle set, and returns a updated position estimate
+The filter used a modular concept. Each step of the filter (prediction, weighting, resampling, injection) is performed
+by a individual class that respectively implements the motion strategy, measurement strategy, resampling strategy
+and injection strategy interface. For each of the steps, individual implementations can be passed to the constructor of the
+particle filter, as long as they implement the correct strategy interface.
   
 
 ## Particle Filter Concept
