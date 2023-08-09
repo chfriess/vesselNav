@@ -78,13 +78,18 @@ to the recent impedance measurement history.
 The number of particles used by the filter can be specified when setting up the navigator class.
 
 ### Prediction Step
-
+For the prediction step, the MotionModel class generates the variable $u_t$ from the displacement
+measurement $\Delta d_{cath, t}$ recorded with the displacement sensing concept at $t$ and the
+estimate for the systematic error of the displacement sensing concept $\alpha_{t}^{[m]}$ of 
+particle $m$:
 ```math 
 u_t^{[m]} = \begin{pmatrix}
     0\\ \Delta d_{cath, t} * \alpha_{t}^{[m]} \\0
 \end{pmatrix} 
 ```
-
+The variable $u_t$ and the measurement noise of the displacement sensing concept $\epsilon(u_t)$ is used
+to determine a normal distribution. The position estimate $d_{t}^{[m]}$ of particle $m$ is drawn from
+that distribution. The error is estimated as variance of the previous displacement values.
 
 
 ```math 
