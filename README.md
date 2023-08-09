@@ -2,9 +2,6 @@
 A particle filter implementation for localizing a catheter in the vessel tree during and endovascular intervention. 
 
 
-
-Test $x+y$
-
 ## Getting Started
 
 - The particle filter implementation depends on the following libraries
@@ -64,7 +61,8 @@ beginning of the vessel with index m.
 ### Particle
 Each particle contains a hypothesis of:
 
-![img.png](particle.png)
+
+$$ x_{t}^{[m]} = \begin{pmatrix} i_{t}^{[m]} \\ d_{t}^{[m]} \\ \alpha_{t}^{[m]} \end{pmatrix} $$
 
 
 - current branch position in the vessel tree $i_{t}^{[m]}$
