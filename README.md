@@ -95,14 +95,48 @@ p(x_t|x_{t-1}^{[m]}, u_t) = \mathcal{N}_3(u_t^{[m]} + x_{t-1}^{[m]}, \begin{pmat
 \end{pmatrix})
 ```
 
+branch switch backward
+```math 
+x_{t}^{[m]} = \begin{pmatrix}
+    k \\ l_k + d_{t}^{[m]} \\\alpha_{t}^{[m]} 
+\end{pmatrix} 
+```
+
+branch switch forward
+```math 
+x_{t}^{[m]} = \begin{pmatrix}
+    s \in_R  S \\ l_{i_{t-1}^{m}} - d_{t}^{[m]}  \\\alpha_{t}^{[m]} 
+```
+
 
 ### Weighting Step
 
+ahistoric
+```math 
+p( z_t | x_{t}^{[m]}) \propto \biggl(\Bigl(z_t - ref_{t}^{[m]}\Bigr)^2\biggr)^{-1}
+```
+
+sliding_dtw
+```math 
+p( z_{t} | x_{t-n:t}^{[m]}, z_{t-n:t-1})  \propto \biggl(CW_{\beta}\Bigl(z_{t-n:t}, ref_{t-n:t}^{[m]}\Bigr)\biggr)^{-1}
+```
 
 ### Resampling Step
 
 ### Injection Step
+alpha-variance injector
+```math 
+x_{t}^{[m]} = \begin{pmatrix}
+    i_{t}^{m} \\ d_{t}^{[m]}   \\\alpha_{t}^{[m]} \leftarrow  \mathcal{N}(\alpha_{t}^{[m]}, 0.1)
+\end{pmatrix} 
+```
 
+random particle injector
+```math 
+x_{t}^{[m]} = \begin{pmatrix}
+    i_{t}^{m} \in_R  I \\ d_{t}^{[m]} \in_R [1,..., l_{i_{t}^{m}}]   \\\alpha_{t}^{[m]} \leftarrow  \mathcal{N}(\alpha_{t}^{[m]}, 0.1)
+\end{pmatrix} 
+```
 
 ## License
 
