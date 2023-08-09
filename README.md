@@ -108,7 +108,10 @@ x_{t}^{[m]} = \begin{pmatrix}
     k \\ l_k + d_{t}^{[m]} \\\alpha_{t}^{[m]} 
 \end{pmatrix} 
 ```
-$k$ is the index of the predecessor vessel, $l_k$ denotes the length of the predecessor vessel.
+$k$ is the index of the predecessor vessel, $l_k$ denotes the length of the predecessor vessel. 
+If $l_k + d_{t}^{[m]} <0 $ displacement, the  branch update is recursively repeated until the displacement 
+estimate of particle $x_{t}^{[m]} $ is positive. 
+
 
 If $d_{t}^{[m]}>l_{i_{t-1}^{m}}$, the particle $m$ estimates that the catheter left the current branch in forward direction, 
 the position estimate is corrected according to:
@@ -117,7 +120,8 @@ x_{t}^{[m]} = \begin{pmatrix}
     s \in_R  S \\ d_{t}^{[m]}  - l_{i_{t-1}^{m}}  \\\alpha_{t}^{[m]} \end{pmatrix}
 ```
 $s$ is a random index drawn from the successor vessels, $l_{i_{t-1}^{m}}$ denotes the length of the current
-vessel.
+vessel. If $d_{t}^{[m]} - l_{i_{t-1}^{m}} > l_{s}$, the branch update is repeated until the displacement 
+estimate of particle $x_{t}^{[m]} $ is located between $0$ and the length of the estimated branch.
 
 ### Weighting Step
 In the weighting step of the particle filter, each particle receives a weight. 
