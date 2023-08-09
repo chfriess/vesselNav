@@ -33,9 +33,13 @@ estimates are located in a pre-interventionally calculated map of vessel centerl
 The Map3D is a data structure to represent the vessel tree and the position based impedance reference predictions
 of the catheter intervention as vessel centerline map.
 A Map3D object can load vessel centerlines as .json files with the add_vessel_from_json method. The .json file
-is expected to have the format: 
-{
-    "signal_per_centerline_position":
+is expected to have the format:  
+  
+
+
+
+    {
+        "signal_per_centerline_position":
           [
             {
               "centerline_position": position, 
@@ -47,7 +51,10 @@ is expected to have the format:
               "reference_signal": reference
             }
           ]
-}
+    }
+
+
+
 The method add_vessel_from_json takes a path to the .json file as well as a unique integer vessel index as argument.
 The connections between the vessels in the Map3D are set by the add_mapping method. This method takes a list of two
 integers [n,m] as argument. The mapping [n,m] indicates that the end of vessel with index n is connected to the 
