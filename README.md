@@ -59,13 +59,13 @@ beginning of the vessel with index m.
 
 
 ### Particle
-Each particle contains a state hypothesis that comprises:
+Each particle $m$ contains a state hypothesis that comprises:
 
 
 ```math 
 x_{t}^{[m]} = \begin{pmatrix} i_{t}^{[m]}, \\ d_{t}^{[m]}, \\ \alpha_{t}^{[m]} \end{pmatrix} 
-```
 
+```
 
 - current branch position in the vessel tree $i_{t}^{[m]}$
 - displacement along the centerline at this branch $d_{t}^{[m]}$
@@ -79,15 +79,21 @@ The number of particles used by the filter can be specified when setting up the 
 
 ### Prediction Step
 
-$$
+```math 
+u_t^{[m]} = \begin{pmatrix}
+    0\\ \Delta d_{cath, t} * \alpha_{t}^{[m]} \\0
+\end{pmatrix} 
+```
 
+
+
+```math 
 p(x_t|x_{t-1}^{[m]}, u_t) = \mathcal{N}_3(u_t^{[m]} + x_{t-1}^{[m]}, \begin{pmatrix}
     0 & 0 & 0\\
     0 & \epsilon(u_t) & 0\\
     0 & 0 & 0
 \end{pmatrix})
-
-$$
+```
 
 
 ### Weighting Step
