@@ -100,19 +100,23 @@ p(x_t|x_{t-1}^{[m]}, u_t) = \mathcal{N}_3(u_t^{[m]} + x_{t-1}^{[m]}, \begin{pmat
 \end{pmatrix})
 ```
 
-branch switch backward
+If the particle $m$ estimates that the catheter left the current branch in backward direction, 
+the position estimate is corrected according to:
 ```math 
 x_{t}^{[m]} = \begin{pmatrix}
     k \\ l_k + d_{t}^{[m]} \\\alpha_{t}^{[m]} 
 \end{pmatrix} 
 ```
+$k$ is the index of the predecessor vessel, $l_k$ denotes the length of the predecessor vessel.
 
-branch switch forward
+If the particle $m$ estimates that the catheter left the current branch in forward direction, 
+the position estimate is corrected according to:
 ```math 
 x_{t}^{[m]} = \begin{pmatrix}
-    s \in_R  S \\ l_{i_{t-1}^{m}} - d_{t}^{[m]}  \\\alpha_{t}^{[m]} \end{pmatrix}
+    s \in_R  S \\ d_{t}^{[m]}  - l_{i_{t-1}^{m}}  \\\alpha_{t}^{[m]} \end{pmatrix}
 ```
-
+$s$ is a random index drawn from the successor vessels, $l_{i_{t-1}^{m}}$ denotes the length of the current
+vessel.
 
 ### Weighting Step
 In the weighting step of the particle filter, each particle receives a weight. 
