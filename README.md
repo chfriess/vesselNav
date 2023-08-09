@@ -3,7 +3,7 @@ A particle filter implementation for localizing a catheter in the vessel tree du
 
 
 
-
+Test $x+y$
 
 ## Getting Started
 
@@ -67,7 +67,7 @@ Each particle contains a hypothesis of:
 ![img.png](particle.png)
 
 
-- current branch position in the vessel tree $i_{t}^{[m]$
+- current branch position in the vessel tree $i_{t}^{[m]}$
 - displacement along the centerline at this branch
 - estimate for the systematic error of the displacement sensing concept
 
