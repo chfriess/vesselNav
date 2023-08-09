@@ -90,6 +90,7 @@ u_t^{[m]} = \begin{pmatrix}
 The variable $u_t$ and the measurement noise of the displacement sensing concept $\epsilon(u_t)$ is used
 to determine a normal distribution. The position estimate $d_{t}^{[m]}$ of particle $m$ is drawn from
 that distribution. The error is estimated as variance of the previous displacement values.
+The predicted position of the particle $m$ is drawn according to:
 
 
 ```math 
@@ -100,7 +101,7 @@ that distribution. The error is estimated as variance of the previous displaceme
 \end{pmatrix})
 ```
 
-If the particle $m$ estimates that the catheter left the current branch in backward direction, 
+If $d_{t}^{[m]}<0$, the particle $m$ estimates that the catheter left the current branch in backward direction, 
 the position estimate is corrected according to:
 ```math 
 x_{t}^{[m]} = \begin{pmatrix}
@@ -109,7 +110,7 @@ x_{t}^{[m]} = \begin{pmatrix}
 ```
 $k$ is the index of the predecessor vessel, $l_k$ denotes the length of the predecessor vessel.
 
-If the particle $m$ estimates that the catheter left the current branch in forward direction, 
+If $d_{t}^{[m]}>l_{i_{t-1}^{m}}$, the particle $m$ estimates that the catheter left the current branch in forward direction, 
 the position estimate is corrected according to:
 ```math 
 x_{t}^{[m]} = \begin{pmatrix}
