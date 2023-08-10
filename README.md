@@ -77,6 +77,8 @@ the recent history of reference predictions of this particle. This reference his
 to the recent impedance measurement history. 
 
 The number of particles used by the filter can be specified when setting up the navigator class.
+To read a position estimate from the set of particles, the particles are clustered in space using DBSCAN **[4]**.
+The average of the largest cluster is used as position estimate.
 
 ### Prediction Step
 For the prediction step, the MotionModel class generates the variable $u_t$ from the displacement
@@ -192,3 +194,6 @@ navigation for displacement and direction detection.” In: International
 journal of computer assisted radiology and surgery. DOI: 10.1007/s11548-
 023-02927-w.
 
+**[4]** Ester, Martin et al. (1996). “A Density-Based Algorithm for Discovering Clus-
+ters in Large Spatial Databases with Noise.” In: Knowledge Discovery and Data
+Mining.
