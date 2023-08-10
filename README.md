@@ -57,6 +57,49 @@ The method add_vessel_from_json takes a path to the .json file as well as a uniq
 The connections between the vessels in the Map3D are set by the add_mapping method. This method takes a list of two
 integers [n,m] as argument. The mapping [n,m] indicates that the end of vessel with index n is connected to the 
 beginning of the vessel with index m. 
+Complete maps can be stored and reloaded as .json files of the format:
+
+
+    {
+        "vessels": {
+            "0" : 
+                [
+                  {
+                    "centerline_position": position, 
+                    "reference_signal": reference
+                  },
+                  ...
+                  {
+                    "centerline_position": position, 
+                    "reference_signal": reference
+                  }
+                ],
+            "1" : 
+                [
+                  {
+                    "centerline_position": position, 
+                    "reference_signal": reference
+                  },
+                  ...
+                  {
+                    "centerline_position": position, 
+                    "reference_signal": reference
+                  }
+                ],
+            ...
+        },
+        "mappings" : [
+            [
+                0,
+                1
+            ],
+            ...
+        ]
+        
+    }
+
+
+
 
 
 ### Particle
