@@ -223,7 +223,7 @@ x_{t}^{[m]} = \begin{pmatrix}
 ```
 
 ## License
-Copyright (c) 2023 Christian Johannes Friess, CC BY-SA 4.0
+Copyright (c) 2023 Christian Johannes Friess, CC BY-NC 4.0
 
 ## references
 **[1]** Sutton, Erin E. et al. (2020). “Biologically Inspired Catheter for Endovascular
