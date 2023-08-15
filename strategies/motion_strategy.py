@@ -11,7 +11,7 @@ class MotionStrategy:
         raise NotImplementedError
 
     @staticmethod
-    def calculate_displacement_error(displacements: list, included_measurements: int = 0):
+    def calculate_displacement_error(displacements: list, included_measurements: int = 10):
         if len(displacements) < 2:
             return 0.3
         elif included_measurements <= 1 or included_measurements >= len(displacements):

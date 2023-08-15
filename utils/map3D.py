@@ -1,3 +1,4 @@
+import copy
 import json
 import numbers
 
@@ -162,3 +163,47 @@ class Map3D:
         for key in keys:
             self.vessels[int(key)] = self.vessels.pop(key)
 
+if __name__ == "__main__":
+    PATH = "C:\\Users\\Chris\\OneDrive\\Desktop\\branch_pruning_agar_I\\3D reference new\\"
+    m = Map3D()
+
+    aorta_0 = list(np.load(PATH+"aorta_0.npy"))
+    aorta_1 = list(np.load(PATH+"aorta_1.npy"))
+    aorta_2 = list(np.load(PATH+"aorta_2.npy"))
+    aorta_3 = list(np.load(PATH+"aorta_3.npy"))
+    aorta_4 = list(np.load(PATH+"aorta_4.npy"))
+
+    renal = list(np.load(PATH+"renal.npy"))
+    iliac = list(np.load(PATH+"iliac.npy"))
+    lumbal = list(np.load(PATH+"lumbal.npy"))
+
+
+    m.add_vessel_impedance_prediction_as_millimeter_list(aorta_0, 0)
+    m.add_vessel_impedance_prediction_as_millimeter_list(aorta_1, 1)
+    m.add_vessel_impedance_prediction_as_millimeter_list(aorta_2, 2)
+    m.add_vessel_impedance_prediction_as_millimeter_list(aorta_3, 3)
+    m.add_vessel_impedance_prediction_as_millimeter_list(aorta_4, 4)
+
+    m.add_vessel_impedance_prediction_as_millimeter_list(iliac, 5)
+    m.add_vessel_impedance_prediction_as_millimeter_list(copy.deepcopy(iliac), 6)
+
+    m.add_vessel_impedance_prediction_as_millimeter_list(renal, 7)
+    m.add_vessel_impedance_prediction_as_millimeter_list(copy.deepcopy(renal), 8)
+
+    m.add_vessel_impedance_prediction_as_millimeter_list(lumbal, 9)
+    m.add_vessel_impedance_prediction_as_millimeter_list(copy.deepcopy(lumbal), 10)
+
+    m.add_mapping([0, 1])
+    m.add_mapping([1, 2])
+    m.add_mapping([2, 3])
+    m.add_mapping([3, 4])
+
+    m.add_mapping([4, 5])
+    m.add_mapping([4, 6])
+
+    m.add_mapping([0, 7])
+    m.add_mapping([1, 8])
+    m.add_mapping([2, 9])
+    m.add_mapping([3, 10])
+
+    m.save_map(PATH, "pruning_map")

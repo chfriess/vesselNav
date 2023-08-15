@@ -29,7 +29,7 @@ class MotionModel3D(MotionStrategy):
                        displacement_measurement: float) -> ParticleSet:
 
         self.displacement_history.append(displacement_measurement)
-        error = self.calculate_displacement_error(self.displacement_history)
+        error = self.calculate_displacement_error(self.displacement_history, self.included_measurements)
         for particle in previous_particle_set:
             position_estimate = particle.get_position()["displacement"] \
                                 + (displacement_measurement * particle.state.alpha)
