@@ -4,10 +4,6 @@ A particle filter implementation for localizing a catheter in the vessel tree du
 
 ## Getting Started
 
-- The particle filter implementation depends on the following libraries
-  - numpy version 1.21.6
-  - tslearn version 0.5.3.2
-  - sklearn version 1.0.2
 - The VesselNavigator class acts as interface to using the particle filter.
   - The setup_navigator method allows to specify the parameters of the filter (Number of particles, Measurement Type, Injector type...)
   - The update_step method takes a displacement and impedance measurement value and updates the particle set, and returns an updated position estimate
